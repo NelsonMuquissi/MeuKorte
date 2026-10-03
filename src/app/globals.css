@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   MEU KORTE — DESIGN TOKENS
+   ----------------------------------------------------------------------------
+   Arquitectura em três camadas, para permitir um modo claro no futuro:
+
+     1. PRIMITIVAS   --mk-*      valores crus. Não usar directamente nos componentes.
+     2. SEMÂNTICAS   --color-*   o que a cor significa. É isto que os componentes usam.
+     3. PONTE        @theme      expõe as semânticas como classes Tailwind.
+
+   Para acrescentar o modo claro mais tarde basta redefinir a CAMADA 2 dentro de
+   `:root[data-theme="light"]`. Nenhum componente precisa de mudar, porque nenhum
+   componente conhece as primitivas. O modo claro NÃO está implementado.
+
+   Regra de cor: o DOURADO é acção (botões, links, foco, destaque). Nunca é estado.
+   Os estados têm matizes próprias — azul, verde, neutro, vermelho — e nunca
+   dependem só da cor: cada badge leva também ícone e texto.
+   ========================================================================== */
+
+:root {
+  /* ---- CAMADA 1: primitivas ---------------------------------------------- */
+
+  /* Neutros (frios, levemente azulados, para contrastar com o dourado quente) */
+  --mk-neutral-0:   #FFFFFF;
+  --mk-neutral-50:  #F5F5F4;
+  --mk-neutral-300: #B0B0B6;
+  --mk-neutral-500: #71717A;
+  --mk-neutral-700: #2A2A30;
+  --mk-neutral-800: #1D1D21;
+  --mk-neutral-900: #141417;
+  --mk-neutral-950: #0B0B0C;
+
+  /* Dourado latão — a cor da marca */
+  --mk-gold-200: #F0C877;
+  --mk-gold-400: #D4A24C;
+  --mk-gold-600: #8C6A2F;
+  --mk-gold-800: #4A3817;
+
+  /* Matizes de estado */
+  --mk-blue-400:  #5FA1E3;  /* pendente   */
+  --mk-green-400: #2CBA73;  /* confirmada */
+  --mk-red-400:   #E87C73;  /* cancelada  */
+
+  /* ---- CAMADA 2: semânticas (tema escuro) -------------------------------- */
+
+  /* Superfícies, da mais funda para a mais elevada */
+  --ui-bg:         var(--mk-neutral-950);
+  --ui-surface:    var(--mk-neutral-900);
+  --ui-surface-2:  var(--mk-neutral-800);
+  --ui-border:     var(--mk-neutral-700);
+
+  /* Texto */
+  --ui-text:       var(--mk-neutral-50);   /* 18.03:1 sobre bg — AAA */
+  --ui-text-muted: var(--mk-neutral-300);  /*  7.79:1 no pior caso — AAA */
+
+  /* Acção — dourado, e só dourado */
+  --ui-primary:     var(--mk-gold-400);
+  --ui-primary-ink: var(--mk-neutral-950); /* texto sobre o dourado — 8.50:1 */
+  --ui-primary-dim: var(--mk-gold-600);    /* hover, bordas */
+  --ui-focus:       var(--mk-gold-200);    /* anel de foco — 12.40:1 */
+
+  /* Estados de marcação. Cada um tem cor + tinta de fundo do badge. */
+  --ui-pending:        var(--mk-blue-400);
+  --ui-pending-tint:   color-mix(in srgb, var(--mk-blue-400) 18%, var(--ui-surface));
+  --ui-confirmed:      var(--mk-green-400);
+  --ui-confirmed-tint: color-mix(in srgb, var(--mk-green-400) 18%, var(--ui-surface));
+  --ui-done:           var(--mk-neutral-300);
+  --ui-done-tint:      color-mix(in srgb, var(--mk-neutral-300) 18%, var(--ui-surface));
+  --ui-cancelled:      var(--mk-red-400);
+  --ui-cancelled-tint: color-mix(in srgb, var(--mk-red-400) 18%, var(--ui-surface));
+
+  /* Raios */
+  --ui-radius-sm: 6px;
+  --ui-radius-md: 10px;
+  --ui-radius-lg: 16px;
+  --ui-radius-xl: 24px;
+
+  /* Elevação. Em fundo escuro a sombra pura perde-se, por isso cada nível
+     combina sombra com uma linha de luz no topo. */
+  --ui-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.40);
+  --ui-shadow-md: 0 4px 12px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --ui-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --ui-shadow-gold: 0 8px 24px color-mix(in srgb, var(--mk-gold-400) 22%, transparent);
+}
+
+/* O modo claro entra aqui no futuro, redefinindo apenas a CAMADA 2.
+   Deixado por implementar de propósito.
+
+:root[data-theme="light"] {
+  --ui-bg:         var(--mk-neutral-0);
+  --ui-surface:    var(--mk-neutral-50);
+  --ui-text:       var(--mk-neutral-950);
+  ...
+}
+*/
+
+/* ---- CAMADA 3: ponte para o Tailwind ------------------------------------- */
+/* `inline` faz com que as classes apontem para a var() em vez de copiarem o valor,
+   para que uma futura troca de tema funcione sem recompilar. */
+@theme inline {
+  --color-bg: var(--ui-bg);
+  --color-surface: var(--ui-surface);
+  --color-surface-2: var(--ui-surface-2);
+  --color-border: var(--ui-border);
+
+  --color-text: var(--ui-text);
+  --color-text-muted: var(--ui-text-muted);
+
+  --color-primary: var(--ui-primary);
+  --color-primary-ink: var(--ui-primary-ink);
+  --color-primary-dim: var(--ui-primary-dim);
+  --color-focus: var(--ui-focus);
+
+  --color-pending: var(--ui-pending);
+  --color-pending-tint: var(--ui-pending-tint);
+  --color-confirmed: var(--ui-confirmed);
+  --color-confirmed-tint: var(--ui-confirmed-tint);
+  --color-done: var(--ui-done);
+  --color-done-tint: var(--ui-done-tint);
+  --color-cancelled: var(--ui-cancelled);
+  --color-cancelled-tint: var(--ui-cancelled-tint);
+
+  --radius-sm: var(--ui-radius-sm);
+  --radius-md: var(--ui-radius-md);
+  --radius-lg: var(--ui-radius-lg);
+  --radius-xl: var(--ui-radius-xl);
+
+  --shadow-sm: var(--ui-shadow-sm);
+  --shadow-md: var(--ui-shadow-md);
+  --shadow-lg: var(--ui-shadow-lg);
+  --shadow-gold: var(--ui-shadow-gold);
+
+  /* As variáveis das fontes são injectadas pelo next/font no layout raiz. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bebas), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
+/* ============================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Impede o iOS de aumentar o texto ao rodar o telemóvel. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--ui-bg);
+    color: var(--ui-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Títulos em Bebas Neue: condensada e sempre em caixa alta. */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 0.95;
+    font-weight: 400;
+  }
+
+  /* Foco visível e consistente em todo o lado — nunca removido. */
+  :focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+    border-radius: var(--ui-radius-sm);
+  }
+
+  /* Preços e horas com algarismos de largura fixa, para alinharem em coluna. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Respeita quem pediu menos movimento no sistema. */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
