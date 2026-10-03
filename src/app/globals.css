@@ -3,101 +3,143 @@
 /* ============================================================================
    MEU KORTE — DESIGN TOKENS
    ----------------------------------------------------------------------------
-   Arquitectura em três camadas, para permitir um modo claro no futuro:
+   As cores vêm do template em docs/template/image3.jpeg, amostradas do próprio
+   ficheiro. O template é a fonte de verdade (ver CLAUDE.md).
 
-     1. PRIMITIVAS   --mk-*      valores crus. Não usar directamente nos componentes.
-     2. SEMÂNTICAS   --color-*   o que a cor significa. É isto que os componentes usam.
+   Três camadas:
+     1. PRIMITIVAS   --mk-*      valores crus. Nunca usados nos componentes.
+     2. SEMÂNTICAS   --ui-*      o que a cor significa. É o que os componentes usam.
      3. PONTE        @theme      expõe as semânticas como classes Tailwind.
 
-   Para acrescentar o modo claro mais tarde basta redefinir a CAMADA 2 dentro de
-   `:root[data-theme="light"]`. Nenhum componente precisa de mudar, porque nenhum
-   componente conhece as primitivas. O modo claro NÃO está implementado.
+   DUAS SUPERFÍCIES. O produto tem dois registos:
+     - ESCURA  (por omissão): home, hero, como funciona, planos, banners,
+               confirmação, cabeçalho e barra lateral.
+     - CLARA   (`data-surface="light"`): todo o fluxo de agendamento e a área
+               do cliente.
 
-   Regra de cor: o DOURADO é acção (botões, links, foco, destaque). Nunca é estado.
-   Os estados têm matizes próprias — azul, verde, neutro, vermelho — e nunca
-   dependem só da cor: cada badge leva também ícone e texto.
+   A superfície clara redefine APENAS a camada 2. Por isso um botão, um card ou
+   um badge funcionam nas duas superfícies sem saber em qual estão, e sem uma
+   única condicional no React.
+
+   REGRAS DE COR
+     - O dourado é acento: CTA principal, item seleccionado, ícones, passos.
+     - O dourado NUNCA é cor de estado.
+     - O dourado NUNCA é texto sobre fundo claro (1,47:1 — ilegível). No claro
+       só aparece como preenchimento, borda de selecção e ícone.
+     - Na superfície clara o botão primário do fluxo é PRETO, como no template.
    ========================================================================== */
 
 :root {
-  /* ---- CAMADA 1: primitivas ---------------------------------------------- */
+  /* ---- CAMADA 1: primitivas -------------------------------------------- */
 
-  /* Neutros (frios, levemente azulados, para contrastar com o dourado quente) */
-  --mk-neutral-0:   #FFFFFF;
-  --mk-neutral-50:  #F5F5F4;
-  --mk-neutral-300: #B0B0B6;
-  --mk-neutral-500: #71717A;
-  --mk-neutral-700: #2A2A30;
-  --mk-neutral-800: #1D1D21;
-  --mk-neutral-900: #141417;
-  --mk-neutral-950: #0B0B0C;
+  /* Neutros frios, do template */
+  --mk-white:      #FFFFFF;
+  --mk-off:        #FAFAF9;
+  --mk-grey-100:   #F3F3F1;
+  --mk-grey-200:   #E6E5E2;
+  --mk-grey-500:   #4D5359;
+  --mk-grey-400:   #AEB6BD;
+  --mk-ink-700:    #2E363D;
+  --mk-ink-800:    #232A31;
+  --mk-ink-900:    #1A2026;
+  --mk-ink-950:    #12171B;
 
-  /* Dourado latão — a cor da marca */
-  --mk-gold-200: #F0C877;
-  --mk-gold-400: #D4A24C;
-  --mk-gold-600: #8C6A2F;
-  --mk-gold-800: #4A3817;
+  /* Dourado champanhe — a cor da marca, tirada do template */
+  --mk-gold:       #F9CE97;
+  --mk-gold-mid:   #D3AE82;
+  --mk-gold-deep:  #8D7460;
+  --mk-cream:      #F9F2EA;
 
-  /* Matizes de estado */
-  --mk-blue-400:  #5FA1E3;  /* pendente   */
-  --mk-green-400: #2CBA73;  /* confirmada */
-  --mk-red-400:   #E87C73;  /* cancelada  */
+  /* Estados — dois tons por matiz, um para cada superfície */
+  --mk-blue-light:  #7FB8EE;  --mk-blue-dark:  #154C84;
+  --mk-green-light: #49C98A;  --mk-green-dark: #0E6F42;
+  --mk-red-light:   #F08C83;  --mk-red-dark:   #841F15;
 
-  /* ---- CAMADA 2: semânticas (tema escuro) -------------------------------- */
+  /* ---- CAMADA 2: semânticas — SUPERFÍCIE ESCURA (por omissão) ----------- */
 
-  /* Superfícies, da mais funda para a mais elevada */
-  --ui-bg:         var(--mk-neutral-950);
-  --ui-surface:    var(--mk-neutral-900);
-  --ui-surface-2:  var(--mk-neutral-800);
-  --ui-border:     var(--mk-neutral-700);
+  --ui-bg:         var(--mk-ink-950);
+  --ui-surface:    var(--mk-ink-900);
+  --ui-surface-2:  var(--mk-ink-800);
+  --ui-border:     var(--mk-ink-700);
 
-  /* Texto */
-  --ui-text:       var(--mk-neutral-50);   /* 18.03:1 sobre bg — AAA */
-  --ui-text-muted: var(--mk-neutral-300);  /*  7.79:1 no pior caso — AAA */
+  --ui-text:       var(--mk-white);      /* 18,04:1 — AAA */
+  --ui-text-muted: var(--mk-grey-400);   /*  7,07:1 no pior caso — AAA */
 
-  /* Acção — dourado, e só dourado */
-  --ui-primary:     var(--mk-gold-400);
-  --ui-primary-ink: var(--mk-neutral-950); /* texto sobre o dourado — 8.50:1 */
-  --ui-primary-dim: var(--mk-gold-600);    /* hover, bordas */
-  --ui-focus:       var(--mk-gold-200);    /* anel de foco — 12.40:1 */
+  /* Acção */
+  --ui-primary:     var(--mk-gold);      /* 12,29:1 como texto sobre bg */
+  --ui-primary-ink: var(--mk-ink-950);   /* 12,29:1 sobre o dourado */
+  --ui-primary-dim: var(--mk-gold-mid);
+  --ui-focus:       var(--mk-gold);
 
-  /* Estados de marcação. Cada um tem cor + tinta de fundo do badge. */
-  --ui-pending:        var(--mk-blue-400);
-  --ui-pending-tint:   color-mix(in srgb, var(--mk-blue-400) 18%, var(--ui-surface));
-  --ui-confirmed:      var(--mk-green-400);
-  --ui-confirmed-tint: color-mix(in srgb, var(--mk-green-400) 18%, var(--ui-surface));
-  --ui-done:           var(--mk-neutral-300);
-  --ui-done-tint:      color-mix(in srgb, var(--mk-neutral-300) 18%, var(--ui-surface));
-  --ui-cancelled:      var(--mk-red-400);
-  --ui-cancelled-tint: color-mix(in srgb, var(--mk-red-400) 18%, var(--ui-surface));
+  /* Botão primário do fluxo. No escuro é dourado; no claro passa a preto. */
+  --ui-action:      var(--mk-gold);
+  --ui-action-ink:  var(--mk-ink-950);
 
-  /* Raios */
-  --ui-radius-sm: 6px;
-  --ui-radius-md: 10px;
+  /* Selecção (card escolhido): borda dourada + fundo com tinta */
+  --ui-selected-bg:     color-mix(in srgb, var(--mk-gold) 12%, var(--ui-bg));
+  --ui-selected-border: var(--mk-gold);
+
+  /* Estados */
+  --ui-pending:        var(--mk-blue-light);
+  --ui-confirmed:      var(--mk-green-light);
+  --ui-done:           var(--mk-grey-400);
+  --ui-cancelled:      var(--mk-red-light);
+  --ui-state-tint:     18%;  /* quanto da cor entra no fundo do badge */
+
+  /* Raios — cantos suaves, como no template */
+  --ui-radius-sm: 8px;
+  --ui-radius-md: 12px;
   --ui-radius-lg: 16px;
   --ui-radius-xl: 24px;
 
-  /* Elevação. Em fundo escuro a sombra pura perde-se, por isso cada nível
-     combina sombra com uma linha de luz no topo. */
-  --ui-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.40);
-  --ui-shadow-md: 0 4px 12px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.04);
-  --ui-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.06);
-  --ui-shadow-gold: 0 8px 24px color-mix(in srgb, var(--mk-gold-400) 22%, transparent);
+  --ui-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.30);
+  --ui-shadow-md: 0 4px 16px rgb(0 0 0 / 0.35);
+  --ui-shadow-lg: 0 16px 40px rgb(0 0 0 / 0.45);
+  --ui-shadow-gold: 0 8px 24px color-mix(in srgb, var(--mk-gold) 20%, transparent);
 }
 
-/* O modo claro entra aqui no futuro, redefinindo apenas a CAMADA 2.
-   Deixado por implementar de propósito.
+/* ---- CAMADA 2 (bis): SUPERFÍCIE CLARA ------------------------------------
+   Aplicada com `data-surface="light"` numa página ou numa secção. Redefine só
+   os tokens semânticos; nenhum componente precisa de mudar.
+   -------------------------------------------------------------------------- */
+[data-surface="light"] {
+  --ui-bg:         var(--mk-white);
+  --ui-surface:    var(--mk-off);
+  --ui-surface-2:  var(--mk-grey-100);
+  --ui-border:     var(--mk-grey-200);
 
-:root[data-theme="light"] {
-  --ui-bg:         var(--mk-neutral-0);
-  --ui-surface:    var(--mk-neutral-50);
-  --ui-text:       var(--mk-neutral-950);
-  ...
+  --ui-text:       var(--mk-ink-950);    /* 18,04:1 — AAA */
+  --ui-text-muted: var(--mk-grey-500);   /*  7,01:1 no pior caso — AAA */
+
+  /* No claro o dourado deixa de poder ser texto. Para texto de destaque usa-se
+     a tinta escura; o dourado fica para preenchimentos e bordas. */
+  --ui-primary:     var(--mk-gold-mid);
+  --ui-primary-ink: var(--mk-ink-950);
+  --ui-primary-dim: var(--mk-gold-deep);
+  --ui-focus:       var(--mk-ink-950);
+
+  /* Botão "Continuar →": preto com texto branco, 18,04:1 */
+  --ui-action:      var(--mk-ink-950);
+  --ui-action-ink:  var(--mk-white);
+
+  --ui-selected-bg:     var(--mk-cream);
+  --ui-selected-border: var(--mk-gold-mid);
+
+  --ui-pending:    var(--mk-blue-dark);
+  --ui-confirmed:  var(--mk-green-dark);
+  --ui-done:       var(--mk-grey-500);
+  --ui-cancelled:  var(--mk-red-dark);
+  --ui-state-tint: 12%;
+
+  --ui-shadow-sm: 0 1px 2px rgb(18 23 27 / 0.06);
+  --ui-shadow-md: 0 4px 16px rgb(18 23 27 / 0.08);
+  --ui-shadow-lg: 0 16px 40px rgb(18 23 27 / 0.12);
 }
-*/
 
-/* ---- CAMADA 3: ponte para o Tailwind ------------------------------------- */
-/* `inline` faz com que as classes apontem para a var() em vez de copiarem o valor,
-   para que uma futura troca de tema funcione sem recompilar. */
+/* ---- CAMADA 3: ponte para o Tailwind ------------------------------------
+   `inline` faz as classes apontarem para a var() em vez de copiarem o valor,
+   para que a troca de superfície funcione em tempo de execução.
+   -------------------------------------------------------------------------- */
 @theme inline {
   --color-bg: var(--ui-bg);
   --color-surface: var(--ui-surface);
@@ -112,14 +154,23 @@
   --color-primary-dim: var(--ui-primary-dim);
   --color-focus: var(--ui-focus);
 
+  --color-action: var(--ui-action);
+  --color-action-ink: var(--ui-action-ink);
+
+  --color-selected: var(--ui-selected-bg);
+  --color-selected-border: var(--ui-selected-border);
+
+  /* O dourado literal, para quando é preciso independentemente da superfície
+     (o preenchimento de um CTA, uma borda de selecção, um ícone). */
+  --color-gold: var(--mk-gold);
+  --color-gold-mid: var(--mk-gold-mid);
+  --color-cream: var(--mk-cream);
+  --color-ink: var(--mk-ink-950);
+
   --color-pending: var(--ui-pending);
-  --color-pending-tint: var(--ui-pending-tint);
   --color-confirmed: var(--ui-confirmed);
-  --color-confirmed-tint: var(--ui-confirmed-tint);
   --color-done: var(--ui-done);
-  --color-done-tint: var(--ui-done-tint);
   --color-cancelled: var(--ui-cancelled);
-  --color-cancelled-tint: var(--ui-cancelled-tint);
 
   --radius-sm: var(--ui-radius-sm);
   --radius-md: var(--ui-radius-md);
@@ -131,9 +182,9 @@
   --shadow-lg: var(--ui-shadow-lg);
   --shadow-gold: var(--ui-shadow-gold);
 
-  /* As variáveis das fontes são injectadas pelo next/font no layout raiz. */
+  /* Injectadas pelo next/font no layout raiz. */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-bebas), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, sans-serif;
 }
 
 /* ============================================================================
@@ -143,7 +194,6 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    /* Impede o iOS de aumentar o texto ao rodar o telemóvel. */
     -webkit-text-size-adjust: 100%;
   }
 
@@ -154,28 +204,31 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Títulos em Bebas Neue: condensada e sempre em caixa alta. */
-  h1, h2, h3 {
+  /* Títulos em Plus Jakarta Sans, bold, com maiúscula inicial — como no
+     template ("O teu barbeiro, onde estiveres."). Sem caixa alta. */
+  h1, h2, h3, h4 {
     font-family: var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: 0.01em;
-    line-height: 0.95;
-    font-weight: 400;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
 
-  /* Foco visível e consistente em todo o lado — nunca removido. */
+  /* Uma secção com superfície própria pinta o seu próprio fundo. */
+  [data-surface] {
+    background-color: var(--ui-bg);
+    color: var(--ui-text);
+  }
+
   :focus-visible {
     outline: 2px solid var(--ui-focus);
     outline-offset: 2px;
     border-radius: var(--ui-radius-sm);
   }
 
-  /* Preços e horas com algarismos de largura fixa, para alinharem em coluna. */
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Respeita quem pediu menos movimento no sistema. */
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after {

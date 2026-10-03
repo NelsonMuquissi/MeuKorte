@@ -47,6 +47,42 @@ serviço é realizado → cliente avalia.
 - Os tipos em `src/types/` (`Barber`, `Service`, `Booking`, `Review`, `BookingStatus`)
   definem o contrato da futura API. As respostas dos serviços seguem o formato do DRF.
 
+## Referência de design
+
+**Os templates em `docs/template/` são a fonte de verdade** para layout, fluxo e
+componentes. Quando houver dúvida sobre como algo deve ser apresentado, a
+resposta está no template, não no gosto de quem implementa.
+
+| Ficheiro | O que é |
+|---|---|
+| `image1.png` | Logótipo: monograma MK prateado, "MEUKORTE", assinatura "O teu barbeiro, à tua maneira" |
+| `image2.jpeg` | Template 1 |
+| `image3.jpeg` | **Template 2 — a base.** Nove ecrãs: home, fluxo de agendamento completo e área do cliente |
+
+As imagens estavam embebidas no `Projecto - Meu Korte.docx` e foram extraídas
+para `docs/template/`.
+
+**"Barbearia Online" e "BarberPro" são placeholders** que aparecem nos
+templates. A marca é **Meu Korte** e o logótipo é o de `image1.png`.
+
+### Duas superfícies
+
+O produto tem dois registos visuais, e cada ecrã pertence a um deles:
+
+- **Escura** — home, hero, "como funciona", planos, banners, ecrã de
+  confirmação, cabeçalho e barra lateral. Fundo `#12171B`.
+- **Clara** — todo o fluxo de agendamento e a área do cliente. Fundo branco,
+  cards com borda subtil, botão primário preto "Continuar →".
+
+O **dourado `#F9CE97`** é acento: CTA principal, item seleccionado (borda
+dourada + visto), ícones e números de passo. **Nunca é cor de estado**, e
+**nunca é texto sobre fundo claro** (1,47:1 — ilegível).
+
+### Terminologia
+
+Na interface diz-se **"agendamento"**, como nos templates. No código mantém-se
+`booking`.
+
 ## Regras Next.js
 
 - App Router. **Server Components por defeito**; `"use client"` apenas onde há
@@ -59,10 +95,13 @@ serviço é realizado → cliente avalia.
 
 ## Convenções
 
-- Tailwind com design tokens definidos no `globals.css` (`@theme`).
+- Tailwind com design tokens definidos no `globals.css` (`@theme`), em duas
+  superfícies (escura e clara) — ver "Referência de design".
 - **Mobile-first**: a maioria dos utilizadores usa telemóvel. Verificar a 360px.
-- Texto da interface em **português de Angola**: "telemóvel", "marcação", "actualizar",
-  "ecrã", "contacto". Nunca "celular", "agendamento", "atualizar".
+- Texto da interface em **português de Angola**: "telemóvel", "actualizar",
+  "ecrã", "contacto". Nunca "celular", "atualizar".
+- Na interface diz-se **"agendamento"**, seguindo os templates. No código o tipo
+  continua a chamar-se `Booking`.
 - Moeda **Kwanza**, formato `5 000 Kz` (espaço como separador de milhares).
 - Telefones **+244**. `<html lang="pt-AO">`.
 - **Código, nomes de ficheiros e componentes em inglês; rotas (URLs) em português.**
@@ -75,7 +114,8 @@ serviço é realizado → cliente avalia.
 | `/barbeiros` | Lista de barbeiros, com filtros |
 | `/barbeiros/[id]` | Perfil do barbeiro (`generateStaticParams`) |
 | `/marcar` | Fluxo de marcação (aceita `?barbeiro=id`) |
-| `/minhas-marcacoes` | Consultar, cancelar e avaliar |
+| `/conta` | Área do cliente: perfil, próximos e histórico |
+| `/minhas-marcacoes` | Redirecciona para `/conta` |
 | `/painel-barbeiro` | Área do barbeiro (demo, atrás de PIN, `noindex`) |
 | `/admin` | Painel administrativo (demo, atrás de PIN, `noindex`) |
 

@@ -1,29 +1,43 @@
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
+/**
+ * Botões.
+ *
+ * As variantes seguem o template:
+ *   - `action`    o primário do fluxo. Dourado na superfície escura, PRETO na
+ *                 clara — é o "Continuar →". Vem dos tokens, não de condicionais.
+ *   - `gold`      dourado sempre, independentemente da superfície. Para os CTA
+ *                 de destaque sobre fundo escuro (hero, confirmação).
+ *   - `outline`   contorno, para a acção secundária sobre fundo escuro.
+ *   - `secondary` card/superfície, para acções de menor peso.
+ *   - `ghost`     sem fundo.
+ *   - `danger`    cancelar.
+ */
+
+type Variant = 'action' | 'gold' | 'outline' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  // O dourado é a cor da acção. Só os botões primários o usam.
-  primary:
-    'bg-primary text-primary-ink hover:bg-primary/90 active:bg-primary-dim shadow-gold',
-  secondary:
-    'bg-surface-2 text-text border border-border hover:border-primary-dim hover:text-primary',
+  action: 'bg-action text-action-ink hover:opacity-90',
+  gold: 'bg-gold text-ink hover:brightness-105',
+  outline: 'border border-current/30 text-text hover:border-current/60',
+  secondary: 'bg-surface-2 text-text border border-border hover:border-primary-dim',
   ghost: 'text-text-muted hover:text-text hover:bg-surface-2',
-  danger: 'bg-cancelled-tint text-cancelled border border-cancelled/40 hover:bg-cancelled/20',
+  danger:
+    'text-cancelled border border-cancelled/40 hover:bg-cancelled/10',
 };
 
 const SIZES: Record<Size, string> = {
-  // `min-h` garante o alvo de toque de 44px recomendado no telemóvel.
-  sm: 'min-h-[38px] px-3 text-sm gap-1.5',
-  md: 'min-h-[44px] px-5 text-base gap-2',
-  lg: 'min-h-[52px] px-7 text-lg gap-2.5',
+  // `min-h` garante o alvo de toque de 44px no telemóvel.
+  sm: 'min-h-[38px] px-3.5 text-sm gap-1.5',
+  md: 'min-h-[46px] px-5 text-base gap-2',
+  lg: 'min-h-[54px] px-7 text-base gap-2.5',
 };
 
 const BASE =
-  'inline-flex items-center justify-center rounded-md font-semibold ' +
-  'transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ' +
+  'inline-flex items-center justify-center rounded-md font-bold ' +
+  'transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed ' +
   'disabled:pointer-events-none select-none';
 
 interface CommonProps {
@@ -33,43 +47,44 @@ interface CommonProps {
   children: ReactNode;
 }
 
-type ButtonProps = CommonProps &
-  Omit<ComponentProps<'button'>, 'className' | 'children'>;
+type ButtonProps = CommonProps & Omit<ComponentProps<'button'>, 'className' | 'children'>;
 
 export function Button({
-  variant = 'primary',
+  variant = 'action',
   size = 'md',
   className = '',
   children,
   ...props
 }: ButtonProps) {
   return (
-    <button
-      className={`${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
-      {...props}
-    >
+    <button className={`${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${className}`} {...props}>
       {children}
     </button>
   );
 }
 
-type ButtonLinkProps = CommonProps &
-  Omit<ComponentProps<typeof Link>, 'className' | 'children'>;
+type ButtonLinkProps = CommonProps & Omit<ComponentProps<typeof Link>, 'className' | 'children'>;
 
-/** O mesmo aspecto do `Button`, mas é uma ligação de verdade — navega e é indexável. */
+/** O mesmo aspecto, mas é uma ligação de verdade — navega e é indexável. */
 export function ButtonLink({
-  variant = 'primary',
+  variant = 'action',
   size = 'md',
   className = '',
   children,
   ...props
 }: ButtonLinkProps) {
   return (
-    <Link
-      className={`${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
-      {...props}
-    >
+    <Link className={`${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${className}`} {...props}>
       {children}
     </Link>
+  );
+}
+
+/** Seta usada nos botões de avanço do fluxo ("Continuar →"). */
+export function ArrowRight() {
+  return (
+    <svg viewBox="0 0 20 20" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M4 10h11m0 0-4-4m4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

@@ -50,39 +50,69 @@ export const PRICING = {
   homeServiceFee: 2500, // PROVISÓRIO — confirmar: haverá taxa de deslocação?
 } as const;
 
-/** Planos de receita: corte avulso e subscrição de membro. */
-export const PLANS = {
-  single: {
-    id: 'avulso',
-    name: 'Corte avulso',
-    price: PRICING.standardCut, // PROVISÓRIO — confirmar
-    period: null,
-    description: 'Marcas quando precisas, pagas só esse corte.',
+/**
+ * Corte avulso — paga-se só o corte que se dá.
+ * É uma das duas entradas da secção "Os nossos serviços".
+ */
+export const SINGLE_CUT = {
+  id: 'avulso',
+  name: 'Corte único',
+  price: PRICING.standardCut, // PROVISÓRIO — confirmar
+  description: 'Escolhe o teu estilo, o teu barbeiro e agenda o teu horário.',
+} as const;
+
+/**
+ * Planos de assinatura.
+ *
+ * São três, como no template, e o do meio é o destacado. Os valores são todos
+ * PROVISÓRIOS: os preços do template são de exemplo e não devem ser copiados.
+ */
+export const SUBSCRIPTION_PLANS = [
+  {
+    id: 'fresh',
+    name: 'Plano Fresh',
+    cutsLabel: '2 cortes/mês',
+    price: 9000, // PROVISÓRIO — confirmar
+    period: 'mês',
+    includedCuts: 2, // PROVISÓRIO — confirmar
     features: [
-      'Escolhes o barbeiro e o horário',
-      'Sem filas de espera',
-      'Atendimento no salão ou ao domicílio',
-      'Avalias o serviço no fim',
-    ],
+      '2 cortes por mês',
+      'Escolhes o barbeiro',
+      'Agendamento prioritário',
+    ], // PROVISÓRIO — confirmar
     highlighted: false,
   },
-  member: {
-    id: 'membro',
-    name: 'Membro Meu Korte',
+  {
+    id: 'premium',
+    name: 'Plano Premium',
+    cutsLabel: '4 cortes/mês',
     price: 18000, // PROVISÓRIO — confirmar
     period: 'mês',
-    /** Cortes incluídos por mês na subscrição. */
     includedCuts: 4, // PROVISÓRIO — confirmar
-    description: 'Para quem corta todas as semanas.',
     features: [
-      '4 cortes por mês incluídos',
-      'Prioridade na marcação de horários',
-      'Taxa de deslocação sem custo',
+      '4 cortes por mês',
       'Barba incluída uma vez por mês',
-    ],
+      'Deslocação sem custo',
+      'Agendamento prioritário',
+    ], // PROVISÓRIO — confirmar
     highlighted: true,
   },
-} as const;
+  {
+    id: 'elite',
+    name: 'Plano Elite',
+    cutsLabel: 'Cortes ilimitados',
+    price: 32000, // PROVISÓRIO — confirmar
+    period: 'mês',
+    includedCuts: null,
+    features: [
+      'Cortes sem limite',
+      'Barba sempre incluída',
+      'Deslocação sem custo',
+      'Barbeiro à tua escolha, sempre',
+    ], // PROVISÓRIO — confirmar
+    highlighted: false,
+  },
+] as const;
 
 /** Comissão retida pela plataforma sobre cada marcação. */
 export const COMMISSION = {

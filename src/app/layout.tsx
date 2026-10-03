@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Bebas_Neue } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
 import { Header } from '@/components/layout/Header';
@@ -17,10 +17,10 @@ const inter = Inter({
   display: 'swap',
 });
 
-const bebas = Bebas_Neue({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: '400',
-  variable: '--font-bebas',
+  weight: ['700', '800'],
+  variable: '--font-jakarta',
   display: 'swap',
 });
 
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   // Acompanha o fundo da aplicação na barra do navegador no telemóvel.
-  themeColor: '#0B0B0C',
+  themeColor: '#12171B',
   width: 'device-width',
   initialScale: 1,
 };
@@ -71,7 +71,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-AO" className={`${inter.variable} ${bebas.variable}`}>
+    <html lang="pt-AO" className={`${inter.variable} ${jakarta.variable}`}>
       <body className="flex min-h-dvh flex-col">
         {/* Primeiro alvo do Tab: deixa saltar a navegação toda. */}
         <a
