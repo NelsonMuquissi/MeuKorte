@@ -11,6 +11,7 @@
  * actual; os restantes ficam como círculos. Acima de `sm` aparecem todos.
  */
 
+/** Os passos da jornada do barbeiro ao domicílio, como no template. */
 export const STEPS = [
   'Serviço',
   'Estilo',
@@ -22,7 +23,19 @@ export const STEPS = [
 
 export type StepIndex = 0 | 1 | 2 | 3 | 4 | 5;
 
-export function Stepper({ current }: { current: StepIndex }) {
+/**
+ * Os passos são um parâmetro porque há duas jornadas com nomes e números
+ * diferentes: a do domicílio começa no serviço, a do salão começa na casa.
+ * O desenho é o mesmo e não tinha porque ser duplicado.
+ */
+export function Stepper({
+  current,
+  steps = STEPS,
+}: {
+  current: number;
+  steps?: readonly string[];
+}) {
+  const STEPS = steps;
   return (
     <nav aria-label="Passos do agendamento">
       <ol className="flex items-start">

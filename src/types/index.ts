@@ -72,6 +72,39 @@ export interface TimeRange {
  */
 export type WeeklySchedule = Record<WeekDay, TimeRange[]>;
 
+/**
+ * Uma barbearia parceira.
+ *
+ * Existe porque há dois clientes diferentes com duas perguntas diferentes. Quem
+ * quer o barbeiro em casa pergunta "quem me vai cortar?"; quem vai ao salão
+ * pergunta "qual é a casa mais perto de mim?". A primeira pergunta responde-se
+ * com um `Barber`, a segunda com uma `Barbershop` — e sem esta entidade a
+ * segunda não tinha resposta, porque a zona vivia espalhada pelos barbeiros.
+ *
+ * A casa é a dona do horário de porta aberta; o barbeiro nunca atende fora
+ * dele, mesmo que o seu horário pessoal diga outra coisa.
+ */
+export interface Barbershop {
+  id: string;
+  /** Usado na URL. */
+  slug: string;
+  name: string;
+  /** Morada legível, para quem vai lá ter. */
+  address: string;
+  /** Zona de Luanda. É por aqui que o cliente filtra. */
+  area: string;
+  /** Caminho a partir de `/public`. */
+  photo: string;
+  /** Uma linha sobre a casa. */
+  description: string;
+  /** Formatos que esta casa aceita. Reúne o que os seus barbeiros fazem. */
+  locationTypes: LocationType[];
+  /** Horário de porta aberta. Limita o horário de cada barbeiro da casa. */
+  schedule: WeeklySchedule;
+  /** Barbeiros que trabalham aqui, por `Barber.id`. */
+  barberIds: string[];
+}
+
 /** Um barbeiro parceiro. */
 export interface Barber {
   id: string;
@@ -84,6 +117,13 @@ export interface Barber {
   specialties: string[];
   /** Zona de Luanda onde o barbeiro atende. */
   area: string;
+  /**
+   * Barbearia onde trabalha, por `Barbershop.id`.
+   *
+   * Opcional porque nem todo o barbeiro tem casa: há quem só faça domicílio.
+   * Esse não aparece na jornada do salão, mas continua a aparecer na outra.
+   */
+  barbershopId?: string;
   /** Formatos de atendimento que este barbeiro aceita. */
   locationTypes: LocationType[];
   schedule: WeeklySchedule;
@@ -103,6 +143,10 @@ export interface Booking {
   barberName: string;
   serviceId: string;
   serviceName: string;
+  /** Barbearia onde foi marcado, quando veio pela jornada do salão. */
+  barbershopId?: string;
+  /** Guardado para o histórico sobreviver a mudanças no catálogo. */
+  barbershopName?: string;
   /** Estilo de corte escolhido. */
   styleName?: string;
   /** Estilo de barba, quando o serviço a inclui. */
@@ -148,6 +192,12 @@ export interface Review {
 /** Dados necessários para criar um agendamento. */
 export type BookingInput = Omit<Booking, 'id' | 'status' | 'createdAt'>;
 
+/** Filtros aceites por `barbershopsService.getBarbershops()`. */
+export interface BarbershopFilters {
+  area?: string;
+  locationType?: LocationType;
+}
+
 /** Filtros aceites por `barbersService.getBarbers()`. */
 export interface BarberFilters {
   locationType?: LocationType;
@@ -180,4 +230,15 @@ export interface TimeSlot {
   available: boolean;
   /** Porque é que o intervalo não está disponível. Só para a interface. */
   reason?: 'ocupado' | 'passado' | 'fora-de-horario';
+}
+
+/**
+ * Um intervalo na grelha de uma barbearia inteira.
+ *
+ * Traz consigo quem está livre a essa hora, para que a atribuição do barbeiro
+ * não obrigue a recalcular a disponibilidade toda outra vez.
+ */
+export interface ShopTimeSlot extends TimeSlot {
+  /** `Barber.id` de quem tem esta hora livre. Vazio quando não há ninguém. */
+  barberIds: string[];
 }

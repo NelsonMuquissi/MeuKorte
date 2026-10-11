@@ -9,7 +9,7 @@
  * Está num ficheiro próprio para que o cabeçalho e o botão não possam ficar com
  * listas diferentes.
  */
-export const FLOW_ROUTES = ['/agendar'];
+export const FLOW_ROUTES = ['/agendar', '/salao'];
 
 /** A rota actual é um fluxo fechado? */
 export function isFlowRoute(pathname: string): boolean {

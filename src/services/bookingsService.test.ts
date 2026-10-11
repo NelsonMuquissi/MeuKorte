@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getAvailableSlots, createBooking, canCancel } from './bookingsService';
+import { getAvailableSlots, getShopSlots, createBooking, canCancel } from './bookingsService';
 import { KEYS } from './storage';
 import type { Booking } from '@/types';
 
@@ -323,5 +323,102 @@ describe('canCancel', () => {
     const early = new Date(2026, 9, 7, 8, 0);
     expect(canCancel({ ...booking, status: 'concluida' }, early)).toBe(false);
     expect(canCancel({ ...booking, status: 'cancelada' }, early)).toBe(false);
+  });
+});
+
+/* ========================================================================== */
+/* getShopSlots — a grelha de uma casa inteira                                */
+/* ========================================================================== */
+
+/**
+ * A casa de Talatona (`s1`) tem dois barbeiros:
+ *  - Edson Kiala (`1`), salão e domicílio, 09:00–13:00 e 14:00–19:00;
+ *  - Nelson Bumba (`2`), SÓ domicílio, 14:00–21:00.
+ *
+ * A casa abre 08:00–20:00 de segunda a sexta.
+ */
+const TALATONA = 's1';
+const NELSON = '2';
+
+describe('getShopSlots — formato filtra os barbeiros', () => {
+  it('no salão ignora quem só faz domicílio', async () => {
+    const slots = await getShopSlots(TALATONA, 'corte', WEDNESDAY, 'salao', EARLY);
+
+    // Nelson só trabalha a partir das 14:00 e só ao domicílio. Se entrasse na
+    // conta, as 19:00 apareciam livres — o Edson já saiu a essa hora.
+    expect(slots.some((s) => s.time === '19:00' && s.available)).toBe(false);
+    expect(slots.every((s) => !s.barberIds.includes(NELSON))).toBe(true);
+  });
+
+  it('ao domicílio conta os dois, e a casa deixa de mandar', async () => {
+    const salao = await getShopSlots(TALATONA, 'corte', WEDNESDAY, 'salao', EARLY);
+    const casa = await getShopSlots(TALATONA, 'corte', WEDNESDAY, 'domicilio', EARLY);
+
+    // Nelson vai até às 21:00; a casa fecha às 20:00. Ao domicílio isso não
+    // importa, por isso há horas tardias que o salão não tem.
+    expect(casa.some((s) => s.time >= '19:00' && s.available)).toBe(true);
+    expect(salao.some((s) => s.time >= '19:00' && s.available)).toBe(false);
+    expect(casa.some((s) => s.barberIds.includes(NELSON))).toBe(true);
+  });
+});
+
+describe('getShopSlots — hora livre é hora de alguém', () => {
+  it('cada hora diz quem a tem livre', async () => {
+    const slots = await getShopSlots(TALATONA, 'corte', WEDNESDAY, 'salao', EARLY);
+    const first = slots.find((s) => s.available);
+
+    expect(first?.barberIds).toContain(EDSON);
+  });
+
+  it('a hora fica livre enquanto houver um barbeiro livre', async () => {
+    // Nelson ocupado às 15:00; Edson livre. Ao domicílio a hora continua a dar.
+    seedBookings(store, [
+      { barberId: NELSON, barberName: 'Nelson Bumba', serviceId: '2-corte',
+        durationMinutes: 40, date: WEDNESDAY, time: '15:00', locationType: 'domicilio' },
+    ]);
+
+    const slots = await getShopSlots(TALATONA, 'corte', WEDNESDAY, 'domicilio', EARLY);
+    const at15 = slots.find((s) => s.time === '15:00');
+
+    expect(at15?.available).toBe(true);
+    expect(at15?.barberIds).toContain(EDSON);
+    expect(at15?.barberIds).not.toContain(NELSON);
+  });
+
+  it('a hora só fecha quando todos estão ocupados', async () => {
+    seedBookings(store, [
+      { barberId: EDSON, barberName: 'Edson Kiala', serviceId: CUT_45,
+        durationMinutes: 45, date: WEDNESDAY, time: '15:00', locationType: 'domicilio' },
+      { barberId: NELSON, barberName: 'Nelson Bumba', serviceId: '2-corte',
+        durationMinutes: 40, date: WEDNESDAY, time: '15:00', locationType: 'domicilio' },
+    ]);
+
+    const slots = await getShopSlots(TALATONA, 'corte', WEDNESDAY, 'domicilio', EARLY);
+    const at15 = slots.find((s) => s.time === '15:00');
+
+    expect(at15?.available).toBe(false);
+    expect(at15?.barberIds).toEqual([]);
+    expect(at15?.reason).toBe('ocupado');
+  });
+});
+
+describe('getShopSlots — casos de fronteira', () => {
+  it('ao domingo não há nada, porque ninguém trabalha', async () => {
+    const slots = await getShopSlots(TALATONA, 'corte', SUNDAY, 'salao', EARLY);
+    expect(slots.every((s) => !s.available)).toBe(true);
+  });
+
+  it('uma casa que não existe devolve lista vazia', async () => {
+    expect(await getShopSlots('nao-existe', 'corte', WEDNESDAY, 'salao', EARLY)).toEqual([]);
+  });
+
+  it('um serviço que a casa não presta devolve lista vazia', async () => {
+    // Nenhum barbeiro de Talatona tem serviço do tipo "infantil".
+    expect(await getShopSlots(TALATONA, 'infantil', WEDNESDAY, 'salao', EARLY)).toEqual([]);
+  });
+
+  it('uma casa só de salão não dá horas ao domicílio', async () => {
+    // Kilamba (`s2`) tem só o João, que não faz domicílio.
+    expect(await getShopSlots('s2', 'corte', WEDNESDAY, 'domicilio', EARLY)).toEqual([]);
   });
 });

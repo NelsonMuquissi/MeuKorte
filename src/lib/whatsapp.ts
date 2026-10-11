@@ -30,9 +30,17 @@ export function bookingWhatsappLink(booking: Booking): string {
   const lines = [
     'Olá! Fiz um agendamento no Meu Korte:',
     '',
+  ];
+
+  // A casa vem primeiro quando existe: para quem vai ao salão, saber onde é
+  // conta mais do que saber quem corta, e é por ela que a barbearia reconhece
+  // o agendamento como seu.
+  if (booking.barbershopName) lines.push(`*Barbearia:* ${booking.barbershopName}`);
+
+  lines.push(
     `*Barbeiro:* ${booking.barberName}`,
     `*Serviço:* ${booking.serviceName}`,
-  ];
+  );
 
   // O estilo é metade da razão de ser do fluxo: é o que poupa a conversa de
   // "como é que querias o corte?" à porta de casa. Só aparece se foi escolhido,

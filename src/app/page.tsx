@@ -139,14 +139,24 @@ export default async function HomePage() {
               tua casa, no teu trabalho ou onde quiseres.
             </p>
 
+            {/* Duas entradas, porque há duas jornadas e começam em sítios
+                diferentes: no salão escolhe-se a casa, ao domicílio escolhe-se
+                o barbeiro. Fazer o cliente escolher aqui poupa-lhe um passo
+                errado lá dentro. Os planos descem para a sua própria secção. */}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/agendar" variant="gold" size="lg">
-                Agendar agora
+              <ButtonLink href="/salao" variant="gold" size="lg">
+                Cortar no salão
               </ButtonLink>
-              <ButtonLink href="#planos" variant="outline" size="lg">
-                Ver planos de assinatura
+              <ButtonLink href="/agendar" variant="outline" size="lg">
+                Barbeiro em minha casa
               </ButtonLink>
             </div>
+
+            <p className="mt-4 text-sm text-text-muted">
+              <Link href="#planos" className="underline-offset-4 hover:underline">
+                Ou vê os planos de assinatura
+              </Link>
+            </p>
           </div>
 
           {/* ---- 2. Barra de confiança ---------------------------------- */}
@@ -195,8 +205,8 @@ export default async function HomePage() {
                   Icon={Scissors}
                   title="Corte único"
                   text={SINGLE_CUT.description}
-                  href="/agendar"
-                  cta="Agendar agora"
+                  href="/salao"
+                  cta="Cortar no salão"
                 />
               </div>
             </div>

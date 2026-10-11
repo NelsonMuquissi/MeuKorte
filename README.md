@@ -34,7 +34,8 @@ src/
 │   ├── page.tsx              /                   página inicial
 │   ├── barbeiros/            /barbeiros          lista, com filtros
 │   │   └── [id]/             /barbeiros/[slug]   perfil (generateStaticParams)
-│   ├── agendar/              /agendar            fluxo de agendamento (6 passos)
+│   ├── agendar/              /agendar            jornada do domicílio (6 passos)
+│   ├── salao/                /salao              jornada do salão (5 passos)
 │   ├── conta/                /conta              consultar, cancelar, avaliar
 │   ├── painel-barbeiro/      demonstração, atrás de PIN
 │   ├── admin/                demonstração, atrás de PIN
@@ -46,15 +47,18 @@ src/
 │   ├── home/                 Faq
 │   ├── barbers/              BarberCard, BarberList, BarberFilters, BarberReviews
 │   ├── account/              AccountArea, AccountNav, AccountSummary, AccountProfile
+│   ├── salon/                SalonFlow
 │   └── booking/              BookingFlow, Stepper, Calendar, SelectableCard,
 │                             BookingCard, ReviewForm, BarberPanel, AdminPanel
 ├── config/business.ts        ⚠️ preços, taxas, regras e contactos — TODOS provisórios
 ├── data/barbers.ts           4 barbeiros de demonstração
+├── data/barbershops.ts       3 barbearias de demonstração
 ├── data/styles.ts            estilos de corte e de barba (passo 2 do fluxo)
 ├── services/                 acesso a dados; imita uma API DRF
 │   ├── storage.ts            o único sítio que conhece o localStorage
 │   ├── barbersService.ts
-│   ├── bookingsService.ts    inclui getAvailableSlots (com testes)
+│   ├── barbershopsService.ts
+│   ├── bookingsService.ts    getAvailableSlots e getShopSlots (com testes)
 │   ├── reviewsService.ts
 │   └── profileService.ts     telemóvel, nome e moradas do cliente (futuro /api/me/)
 ├── types/index.ts            contrato da futura API
@@ -206,6 +210,7 @@ continuam a ser marcadores gerados com "FOTO PROVISÓRIA" escrito por cima.
 | `confianca.jpg` | ✅ real | Banner "Mais do que um corte. É confiança." |
 | `og.jpg` (em `public/`) | ✅ real | Partilha no WhatsApp e no Instagram, 1200×630 |
 | `barber-*.jpg` (4) | ⚠️ provisória | Perfil e escolha do barbeiro. Quadrada, ≥ 800×800 |
+| `shop-*.jpg` (3) | ⚠️ provisória | Escolha da barbearia, passo 1 do salão. Horizontal 8:5, ≥ 1200×750 |
 | `style-*.jpg` (6) | ⚠️ provisória | Passo 2 do fluxo — estilo de corte. Vertical 4:5, ≥ 800×1000 |
 | `beard-*.jpg` (3) | ⚠️ provisória | Passo 2 do fluxo — estilo de barba. Vertical 4:5, ≥ 800×1000 |
 | `confirmacao-fundo.jpg` | 🗑️ sem uso | Era do ecrã de confirmação antigo. Pode apagar-se |

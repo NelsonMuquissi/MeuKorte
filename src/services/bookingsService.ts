@@ -12,11 +12,15 @@ import type {
   Booking,
   BookingInput,
   BookingStatus,
+  LocationType,
   PaginatedResponse,
+  ServiceType,
+  ShopTimeSlot,
   TimeSlot,
   WeekDay,
 } from '@/types';
 import { barbers } from '@/data/barbers';
+import { barbershops } from '@/data/barbershops';
 import {
   SLOT_INTERVAL_MINUTES,
   MIN_BOOKING_NOTICE_HOURS,
@@ -131,6 +135,95 @@ export async function getAvailableSlots(
 
   // Os turnos vêm por ordem, mas ordenar protege contra dados mal introduzidos.
   return slots.sort((a, b) => a.time.localeCompare(b.time));
+}
+
+/**
+ * Horas livres de uma barbearia inteira, num dia, para um tipo de serviço.
+ *
+ * É o que a jornada do salão precisa quando o cliente não quer escolher
+ * barbeiro: ele pergunta "a que horas podem atender-me?", não "a que horas está
+ * o Edson livre?". Uma hora está livre se PELO MENOS UM barbeiro da casa a
+ * tiver livre, e cada hora traz consigo a lista de quem a tem — é essa lista
+ * que depois permite atribuir um barbeiro sem voltar a calcular tudo.
+ *
+ * Duas regras que não são óbvias:
+ *
+ *  - o formato filtra os barbeiros antes da conta. A casa de Talatona tem dois,
+ *    mas um só faz domicílio: oferecê-lo a quem escolheu salão daria horas que
+ *    não existem;
+ *  - no salão, a casa manda. Um barbeiro cujo horário pessoal passe da hora de
+ *    fecho não atende depois do fecho, porque a porta está trancada. Ao
+ *    domicílio não se aplica: aí a casa não entra.
+ *
+ * Cada barbeiro tem o seu próprio serviço para o mesmo tipo, com a sua duração,
+ * por isso a conta é feita barbeiro a barbeiro e só depois reunida.
+ *
+ * Equivalente futuro: `GET /api/barbershops/{id}/slots/?service_type=&date=&location_type=`
+ */
+export async function getShopSlots(
+  shopId: string,
+  serviceType: ServiceType,
+  date: string,
+  locationType: LocationType,
+  now: Date = new Date(),
+): Promise<ShopTimeSlot[]> {
+  const shop = barbershops.find((s) => s.id === shopId || s.slug === shopId);
+  if (!shop) return [];
+
+  const eligible = shop.barberIds
+    .map((id) => barbers.find((b) => b.id === id))
+    .filter((b): b is NonNullable<typeof b> => b !== undefined)
+    .filter((b) => b.locationTypes.includes(locationType));
+
+  if (eligible.length === 0) return [];
+
+  // No salão, nada antes de abrir nem depois de fechar.
+  const weekDay = parseDate(date).getDay() as WeekDay;
+  const shopRanges = locationType === 'salao' ? shop.schedule[weekDay] ?? [] : null;
+  if (shopRanges !== null && shopRanges.length === 0) return []; // casa fechada
+
+  const withinShopHours = (time: string, durationMinutes: number): boolean => {
+    if (shopRanges === null) return true;
+    const start = timeToMinutes(time);
+    const end = start + durationMinutes;
+    return shopRanges.some(
+      (r) => start >= timeToMinutes(r.start) && end <= timeToMinutes(r.end),
+    );
+  };
+
+  /** Por hora: quem a tem livre, e a melhor razão quando ninguém a tem. */
+  const byTime = new Map<string, { free: string[]; reason?: TimeSlot['reason'] }>();
+
+  for (const barber of eligible) {
+    const service = barber.services.find((s) => s.type === serviceType);
+    if (!service) continue; // este barbeiro não presta este serviço
+
+    const slots = await getAvailableSlots(barber.id, service.id, date, now);
+
+    for (const slot of slots) {
+      if (!withinShopHours(slot.time, service.durationMinutes)) continue;
+
+      const entry = byTime.get(slot.time) ?? { free: [] };
+      if (slot.available) {
+        entry.free.push(barber.id);
+      } else if (entry.free.length === 0) {
+        // "Ocupado" é mais informativo do que "passado": se uma hora já passou
+        // para um barbeiro, passou para todos, mas se está ocupada é porque
+        // alguém a tem marcada. Guarda-se a razão mais útil ao cliente.
+        entry.reason = entry.reason === 'ocupado' ? entry.reason : slot.reason;
+      }
+      byTime.set(slot.time, entry);
+    }
+  }
+
+  return [...byTime.entries()]
+    .map(([time, { free, reason }]) => ({
+      time,
+      available: free.length > 0,
+      reason: free.length > 0 ? undefined : reason,
+      barberIds: free,
+    }))
+    .sort((a, b) => a.time.localeCompare(b.time));
 }
 
 /**

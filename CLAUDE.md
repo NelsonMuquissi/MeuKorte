@@ -27,9 +27,23 @@ mais baixo — o valor aqui está na conveniência e na poupança de tempo.
 **Metas do MVP (90 dias).** 4 barbeiros parceiros · 100 utilizadores · 25+ marcações ·
 90% de satisfação/recorrência.
 
-**Fluxo de marcação.** Cliente entra → escolhe barbeiro → escolhe serviço e horário →
-confirma → barbeiro recebe o pedido → aceita ou rejeita → cliente recebe confirmação →
-serviço é realizado → cliente avalia.
+**Duas jornadas, porque há duas perguntas.** Quem quer o barbeiro em casa pergunta
+"quem me vai cortar?"; quem vai ao salão pergunta "qual é a casa mais perto de mim?".
+A página inicial separa-as logo no herói, e cada uma começa onde o seu cliente começa:
+
+| Jornada | Rota | Passos |
+|---|---|---|
+| **Domicílio** | `/agendar` | Serviço → Estilo → Barbeiro → Agendamento → Localização → Confirmação |
+| **Salão** | `/salao` | Barbearia → Formato → Corte → Barbeiro e hora → Confirmação |
+
+Na jornada do salão o **barbeiro é opcional**: há "qualquer um disponível", que
+reúne as horas livres da casa inteira e só atribui o profissional na confirmação.
+Com um único barbeiro elegível a opção não aparece — não abriria hora nenhuma a
+mais.
+
+Depois de confirmado, o resto é igual nas duas: o barbeiro recebe o pedido por
+WhatsApp → aceita ou rejeita → cliente recebe confirmação → serviço é realizado →
+cliente avalia.
 
 ## Fase actual: SEM BACKEND
 
@@ -44,13 +58,20 @@ serviço é realizado → cliente avalia.
   API REST. **Componentes nunca acedem directamente a JSON nem ao `localStorage`.**
 - O armazenamento está isolado em `src/services/storage.ts`. Trocar o `localStorage` por
   `fetch` deve tocar apenas em `src/services/`.
-- Os tipos em `src/types/` (`Barber`, `Service`, `Booking`, `Review`, `BookingStatus`)
-  definem o contrato da futura API. As respostas dos serviços seguem o formato do DRF.
+- Os tipos em `src/types/` (`Barbershop`, `Barber`, `Service`, `Booking`, `Review`,
+  `BookingStatus`) definem o contrato da futura API. A `Barbershop` é dona do
+  horário de porta aberta: no salão, nenhum barbeiro atende fora dele.
+  As respostas dos serviços seguem o formato do DRF.
 
 ## Referência de design
 
 **Os templates em `docs/template/` são a fonte de verdade** para layout, fluxo e
-componentes. Quando houver dúvida sobre como algo deve ser apresentado, a
+componentes — no que eles cobrem, que é a jornada do domicílio e a área do cliente.
+
+**A jornada do salão (`/salao`) não está nos templates.** É uma decisão de produto
+posterior, e por isso não há template para consultar: reutiliza as mesmas peças
+(`Stepper`, `SelectableCard`, `Calendar`) e as mesmas regras de cor, mas a ordem
+dos passos é a que está na tabela acima, não a dos nove ecrãs. Quando houver dúvida sobre como algo deve ser apresentado, a
 resposta está no template, não no gosto de quem implementa.
 
 | Ficheiro | O que é |
@@ -113,7 +134,9 @@ Na interface diz-se **"agendamento"**, como nos templates. No código mantém-se
 | `/` | Página inicial — recebe o tráfego do Instagram e do TikTok |
 | `/barbeiros` | Lista de barbeiros, com filtros |
 | `/barbeiros/[id]` | Perfil do barbeiro (`generateStaticParams`) |
-| `/marcar` | Fluxo de marcação (aceita `?barbeiro=id`) |
+| `/agendar` | Jornada do domicílio (aceita `?barbeiro=id`) |
+| `/salao` | Jornada do salão (aceita `?barbearia=id`) |
+| `/marcar` | Redirecciona para `/agendar` |
 | `/conta` | Área do cliente: perfil, próximos e histórico |
 | `/minhas-marcacoes` | Redirecciona para `/conta` |
 | `/painel-barbeiro` | Área do barbeiro (demo, atrás de PIN, `noindex`) |

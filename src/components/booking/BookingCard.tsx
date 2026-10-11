@@ -43,7 +43,10 @@ export function BookingCard({
           <h3 className="font-sans text-lg font-semibold normal-case tracking-normal text-text">
             {booking.serviceName}
           </h3>
-          <p className="text-sm text-text-muted">com {booking.barberName}</p>
+          <p className="text-sm text-text-muted">
+            com {booking.barberName}
+            {booking.barbershopName ? ` · ${booking.barbershopName}` : ''}
+          </p>
         </div>
         <StatusBadge status={booking.status} />
       </div>
