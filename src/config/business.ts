@@ -51,6 +51,40 @@ export const PRICING = {
 } as const;
 
 /**
+ * Os dois serviços que abrem o fluxo de agendamento.
+ *
+ * No template, o primeiro passo é escolher o serviço — antes do barbeiro. Por
+ * isso o serviço tem de existir independentemente de quem o presta: o preço
+ * aqui é o de referência ("Desde X Kz") e o preço real vem do barbeiro
+ * escolhido no passo 3.
+ */
+export const BOOKABLE_SERVICES = [
+  {
+    type: 'corte' as const,
+    name: 'Corte de cabelo',
+    fromPrice: PRICING.standardCut, // PROVISÓRIO — confirmar
+    includesBeard: false,
+    included: [
+      'Corte profissional',
+      'Acabamento com produtos de qualidade',
+      'Deslocação do barbeiro, se escolheres domicílio',
+    ], // PROVISÓRIO — confirmar
+  },
+  {
+    type: 'corte-barba' as const,
+    name: 'Corte + Barba',
+    fromPrice: PRICING.cutAndBeard, // PROVISÓRIO — confirmar
+    includesBeard: true,
+    included: [
+      'Corte profissional',
+      'Barba desenhada com toalha quente',
+      'Acabamento com produtos de qualidade',
+      'Deslocação do barbeiro, se escolheres domicílio',
+    ], // PROVISÓRIO — confirmar
+  },
+] as const;
+
+/**
  * Corte avulso — paga-se só o corte que se dá.
  * É uma das duas entradas da secção "Os nossos serviços".
  */
@@ -114,7 +148,7 @@ export const SUBSCRIPTION_PLANS = [
   },
 ] as const;
 
-/** Comissão retida pela plataforma sobre cada marcação. */
+/** Comissão retida pela plataforma sobre cado agendamento. */
 export const COMMISSION = {
   /** Percentagem sobre o valor do serviço (0.15 = 15%). */
   rate: 0.15, // PROVISÓRIO — confirmar: comissão, subscrição ou ambos?
@@ -122,7 +156,7 @@ export const COMMISSION = {
 
 /** Momento em que o cliente paga. */
 export const PAYMENT = {
-  /** `on_service` = paga no fim do serviço; `on_booking` = paga ao marcar. */
+  /** `on_service` = paga no fim do serviço; `on_booking` = paga ao agendar. */
   moment: 'on_service' as 'on_service' | 'on_booking', // PROVISÓRIO — confirmar
   /** Métodos aceites, por ordem de apresentação. */
   methods: ['Multicaixa Express', 'Transferência', 'Numerário'], // PROVISÓRIO — confirmar
@@ -132,7 +166,7 @@ export const PAYMENT = {
 export const CANCELLATION = {
   /** Antecedência mínima, em horas, para cancelar sem penalização. */
   minHoursBefore: 2, // PROVISÓRIO — confirmar
-  /** Tolerância de atraso, em minutos, antes de a marcação ser dada como falta. */
+  /** Tolerância de atraso, em minutos, antes de o agendamento ser dada como falta. */
   lateToleranceMinutes: 15, // PROVISÓRIO — confirmar
   /** Há penalização por falta sem aviso? */
   noShowPenalty: false, // PROVISÓRIO — confirmar
@@ -159,6 +193,56 @@ export const CONTACT = {
  */
 export const DEMO_PIN = '2024'; // PROVISÓRIO — substituir por autenticação Django
 
+/**
+ * Afirmações feitas ao cliente na interface.
+ *
+ * Tudo o que aqui está é uma PROMESSA. Se o texto disser que o pagamento é no
+ * fim e a regra mudar, o site passa a mentir — por isso as frases vivem aqui,
+ * ao lado das regras de que dependem, e não espalhadas pelos componentes.
+ *
+ * Nenhuma destas frases pode prometer um tempo de execução: o fluxo tem seis
+ * passos e não há medição nenhuma que sustente "em menos de um minuto".
+ */
+export const CLAIMS = {
+  /**
+   * Existe mesmo um processo de selecção e verificação dos barbeiros?
+   *
+   * Com `false`, a interface deixa de o afirmar e passa a descrever apenas o
+   * que é verdade. Não afirmar é melhor do que afirmar sem processo montado.
+   */
+  barbersVerified: true, // PROVISÓRIO — confirmar: há processo de verificação?
+  barbersVerifiedText: 'Seleccionados e verificados', // PROVISÓRIO — confirmar
+  /** Usado quando não há processo de verificação. */
+  barbersFallbackText: 'Profissionais parceiros em Luanda',
+
+  /** Agendamento. Descreve o que o cliente faz, sem prometer tempo. */
+  bookingText: 'Escolhes o barbeiro, o estilo e a hora', // PROVISÓRIO — confirmar
+
+  /** Deslocação ao domicílio. */
+  homeServiceText: 'Em tua casa ou no salão', // PROVISÓRIO — confirmar
+
+  /**
+   * Pagamento. O texto segue `PAYMENT.moment` — ver `paymentClaim()` abaixo,
+   * que é o que a interface deve usar.
+   */
+  paymentOnServiceText: 'Pagas no fim do serviço', // PROVISÓRIO — confirmar
+  paymentOnBookingText: 'Pagas no momento do agendamento', // PROVISÓRIO — confirmar
+} as const;
+
+/** A frase de pagamento certa para a regra actualmente em vigor. */
+export function paymentClaim(): string {
+  return PAYMENT.moment === 'on_service'
+    ? CLAIMS.paymentOnServiceText
+    : CLAIMS.paymentOnBookingText;
+}
+
+/** A frase sobre os barbeiros, consoante exista ou não verificação. */
+export function barbersClaim(): string {
+  return CLAIMS.barbersVerified
+    ? CLAIMS.barbersVerifiedText
+    : CLAIMS.barbersFallbackText;
+}
+
 /** Metas de validação do MVP, usadas nos indicadores do /admin. */
 export const MVP_GOALS = {
   barbers: 4,
@@ -172,8 +256,8 @@ export const MVP_GOALS = {
 /** Duração, em minutos, de cada intervalo da grelha de horários. */
 export const SLOT_INTERVAL_MINUTES = 30; // PROVISÓRIO — confirmar
 
-/** Antecedência mínima, em horas, entre o momento actual e a marcação. */
+/** Antecedência mínima, em horas, entre o momento actual e o agendamento. */
 export const MIN_BOOKING_NOTICE_HOURS = 1; // PROVISÓRIO — confirmar
 
-/** Número de dias para a frente que o cliente pode marcar. */
+/** Número de dias para a frente que o cliente pode agendar. */
 export const BOOKING_WINDOW_DAYS = 30; // PROVISÓRIO — confirmar

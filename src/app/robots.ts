@@ -14,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin', '/painel-barbeiro', '/minhas-marcacoes'],
+      disallow: ['/admin', '/painel-barbeiro', '/conta'],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };

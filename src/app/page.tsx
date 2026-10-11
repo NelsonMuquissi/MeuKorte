@@ -13,7 +13,7 @@ import { formatKz } from '@/lib/format';
 import { generalWhatsappLink } from '@/lib/whatsapp';
 import {
   SINGLE_CUT, SUBSCRIPTION_PLANS, PRICING, CANCELLATION,
-  PAYMENT, PILOT_AREA, SERVICE_FORMATS,
+  PAYMENT, PILOT_AREA, SERVICE_FORMATS, CLAIMS, paymentClaim, barbersClaim,
 } from '@/config/business';
 
 export const metadata: Metadata = {
@@ -43,7 +43,7 @@ export default async function HomePage() {
     {
       question: 'Posso cancelar um agendamento?',
       answer:
-        `Podes, até ${CANCELLATION.minHoursBefore} horas antes da hora marcada, ` +
+        `Podes, até ${CANCELLATION.minHoursBefore} horas antes da hora agendada, ` +
         'na tua conta. Depois disso o barbeiro já reservou o tempo para ti, por ' +
         'isso pedimos que fales connosco pelo WhatsApp. Há uma tolerância de ' +
         `${CANCELLATION.lateToleranceMinutes} minutos de atraso.`,
@@ -96,10 +96,33 @@ export default async function HomePage() {
             sizes="(max-width: 1024px) 100vw, 62vw"
             className="object-cover object-center"
           />
-          {/* Gradiente que garante contraste do texto por cima da foto. */}
+          {/*
+            Dois véus, porque o texto está por cima da fotografia em dois sítios
+            diferentes e com exigências diferentes.
+
+            1. HORIZONTAL — protege o título e o parágrafo, que estão à esquerda.
+               No telemóvel não há "à esquerda": o texto ocupa a largura toda e
+               passa por cima do rosto, que é a parte clara da foto. Por isso o
+               véu do telemóvel é muito mais fechado do que o do desktop, onde o
+               texto fica na metade esquerda e a foto pode respirar à direita.
+
+            2. VERTICAL — protege a barra de confiança, encostada ao fundo e a
+               toda a largura. No desktop o véu horizontal já se desfez nessa
+               zona, e sem este segundo véu o último item ficava por cima da
+               parte iluminada da foto.
+
+            Os valores não são de gosto: são o que faz o pior pixel por baixo de
+            cada texto passar o contraste mínimo. Trocar a fotografia por uma
+            mais clara obriga a medir outra vez — foi o que aconteceu quando a
+            foto provisória, escura, deu lugar a esta.
+          */}
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/40 lg:from-ink lg:via-ink/70 lg:to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-ink via-ink/92 to-ink/80 lg:from-ink lg:via-ink/70 lg:to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink via-ink/80 to-transparent"
           />
         </div>
 
@@ -117,7 +140,7 @@ export default async function HomePage() {
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/marcar" variant="gold" size="lg">
+              <ButtonLink href="/agendar" variant="gold" size="lg">
                 Agendar agora
               </ButtonLink>
               <ButtonLink href="#planos" variant="outline" size="lg">
@@ -129,10 +152,14 @@ export default async function HomePage() {
           {/* ---- 2. Barra de confiança ---------------------------------- */}
           <ul className="mt-14 grid gap-5 border-t border-white/10 pt-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { Icon: BarberCheck, title: 'Barbeiros profissionais', text: 'Seleccionados e verificados' },
-              { Icon: CalendarClock, title: 'Agendamento online', text: 'Marcas em menos de um minuto' },
-              { Icon: HomePin, title: 'Serviço ao domicílio', text: 'Em tua casa ou no salão' },
-              { Icon: ShieldCard, title: 'Pagamento seguro', text: 'Só pagas depois do corte' },
+              // As quatro frases são promessas ao cliente e vivem em
+              // `business.ts`, ao lado das regras de que dependem. A do
+              // pagamento muda sozinha se `PAYMENT.moment` mudar; a dos
+              // barbeiros desaparece se não houver processo de verificação.
+              { Icon: BarberCheck, title: 'Barbeiros profissionais', text: barbersClaim() },
+              { Icon: CalendarClock, title: 'Agendamento online', text: CLAIMS.bookingText },
+              { Icon: HomePin, title: 'Serviço ao domicílio', text: CLAIMS.homeServiceText },
+              { Icon: ShieldCard, title: 'Pagamento seguro', text: paymentClaim() },
             ].map(({ Icon, title, text }) => (
               <li key={title} className="flex items-start gap-3">
                 <Icon className="mt-0.5 size-6 shrink-0 text-gold" />
@@ -168,7 +195,7 @@ export default async function HomePage() {
                   Icon={Scissors}
                   title="Corte único"
                   text={SINGLE_CUT.description}
-                  href="/marcar"
+                  href="/agendar"
                   cta="Agendar agora"
                 />
               </div>
@@ -207,7 +234,9 @@ export default async function HomePage() {
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <h2 className="text-3xl sm:text-4xl">Como funciona</h2>
-          <p className="mt-2 text-text-muted">Quatro passos, menos de um minuto.</p>
+          <p className="mt-2 text-text-muted">
+            Escolhes o serviço, o estilo, o barbeiro e a hora.
+          </p>
 
           <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -229,7 +258,7 @@ export default async function HomePage() {
             ))}
           </ol>
 
-          <ButtonLink href="/marcar" variant="gold" size="lg" className="mt-10">
+          <ButtonLink href="/agendar" variant="gold" size="lg" className="mt-10">
             Começar agora
           </ButtonLink>
         </div>
@@ -352,7 +381,7 @@ export default async function HomePage() {
                 O mesmo barbeiro, o mesmo cuidado, sempre que precisares.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/marcar" variant="gold" size="lg">
+                <ButtonLink href="/agendar" variant="gold" size="lg">
                   Agendar agora
                 </ButtonLink>
                 <a

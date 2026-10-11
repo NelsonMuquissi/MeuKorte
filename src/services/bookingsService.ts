@@ -1,5 +1,5 @@
 /**
- * Serviço de marcações.
+ * Serviço de agendamentos.
  *
  * Hoje guarda no `localStorage`, através de `storage.ts`. Na fase Django passa a
  * `POST /api/bookings/` e companhia, com as mesmas assinaturas.
@@ -29,12 +29,12 @@ import { read, write, KEYS, generateId, notifyChange } from './storage';
 /** Estados que continuam a ocupar o horário do barbeiro. */
 const BLOCKING_STATUSES: BookingStatus[] = ['pendente', 'confirmada', 'concluida'];
 
-/** Lê todas as marcações do armazenamento. */
+/** Lê todos os agendamentos do armazenamento. */
 function readBookings(): Booking[] {
   return read<Booking[]>(KEYS.bookings, []);
 }
 
-/** Grava todas as marcações e avisa os componentes. */
+/** Grava todos os agendamentos e avisa os componentes. */
 function writeBookings(bookings: Booking[]): void {
   write(KEYS.bookings, bookings);
   notifyChange();
@@ -44,14 +44,14 @@ function writeBookings(bookings: Booking[]): void {
  * Calcula os horários livres de um barbeiro, para um serviço, num dia.
  *
  * O cálculo parte de três coisas: o horário semanal do barbeiro, a duração do
- * serviço escolhido e as marcações que já existem.
+ * serviço escolhido e os agendamentos que já existem.
  *
  * Regras:
  *  - o serviço tem de caber inteiro dentro de um intervalo de trabalho, por isso
  *    um corte de 75 min não aparece às 12:30 se o turno acabar às 13:00;
- *  - não pode haver sobreposição com marcações existentes, e a sobreposição é
+ *  - não pode haver sobreposição com agendamentos existentes, e a sobreposição é
  *    testada com a duração completa dos dois lados, não apenas com a hora de início;
- *  - marcações canceladas libertam o horário;
+ *  - agendamentos cancelados libertam o horário;
  *  - nada no passado, e nada antes da antecedência mínima.
  *
  * @param now Injectável para que os testes sejam deterministas. Em produção é
@@ -75,7 +75,7 @@ export async function getAvailableSlots(
   const ranges = barber.schedule[weekDay] ?? [];
   if (ranges.length === 0) return []; // dia de folga
 
-  // Marcações que ocupam este dia, já convertidas em intervalos de minutos.
+  // Agendamentos que ocupam este dia, já convertidas em intervalos de minutos.
   const busy = readBookings()
     .filter(
       (b) =>
@@ -134,11 +134,11 @@ export async function getAvailableSlots(
 }
 
 /**
- * Cria uma marcação.
+ * Cria um agendamento.
  *
  * Volta a validar a disponibilidade antes de gravar: entre o momento em que o
  * cliente escolheu o horário e o momento em que carregou em confirmar, outra
- * marcação pode ter ocupado o lugar. No Django esta verificação passa a ser feita
+ * agendamento pode ter ocupado o lugar. No Django esta verificação passa a ser feita
  * no servidor, dentro da transacção.
  *
  * Equivalente futuro: `POST /api/bookings/`
@@ -168,7 +168,7 @@ export async function createBooking(data: BookingInput): Promise<Booking> {
 }
 
 /**
- * Marcações de um cliente, identificado pelo telemóvel.
+ * Agendamentos de um cliente, identificado pelo telemóvel.
  *
  * Equivalente futuro: `GET /api/bookings/?phone=` (autenticado).
  */
@@ -188,7 +188,7 @@ export async function getBookingsByPhone(
 }
 
 /**
- * Todas as marcações. Usada pelos painéis de demonstração.
+ * Todos os agendamentos. Usada pelos painéis de demonstração.
  *
  * Equivalente futuro: `GET /api/bookings/` (só administrador).
  */
@@ -199,13 +199,13 @@ export async function getAllBookings(): Promise<PaginatedResponse<Booking>> {
   return { count: results.length, next: null, previous: null, results };
 }
 
-/** Uma marcação pelo identificador. */
+/** Umo agendamento pelo identificador. */
 export async function getBookingById(id: string): Promise<Booking | null> {
   return readBookings().find((b) => b.id === id) ?? null;
 }
 
 /**
- * Diz se uma marcação ainda pode ser cancelada, segundo a antecedência mínima
+ * Diz se um agendamento ainda pode ser cancelada, segundo a antecedência mínima
  * definida em `business.ts`.
  */
 export function canCancel(booking: Booking, now: Date = new Date()): boolean {
@@ -217,14 +217,14 @@ export function canCancel(booking: Booking, now: Date = new Date()): boolean {
 }
 
 /**
- * Cancela uma marcação, respeitando a antecedência mínima.
+ * Cancela um agendamento, respeitando a antecedência mínima.
  *
  * Equivalente futuro: `PATCH /api/bookings/{id}/` com `status: "cancelada"`.
  */
 export async function cancelBooking(id: string): Promise<Booking> {
   const bookings = readBookings();
   const booking = bookings.find((b) => b.id === id);
-  if (!booking) throw new Error('Marcação não encontrada.');
+  if (!booking) throw new Error('Agendamento não encontrado.');
 
   if (!canCancel(booking)) {
     throw new Error(
@@ -238,7 +238,7 @@ export async function cancelBooking(id: string): Promise<Booking> {
 }
 
 /**
- * Muda o estado de uma marcação. Usada pelo painel do barbeiro.
+ * Muda o estado de um agendamento. Usada pelo painel do barbeiro.
  *
  * Equivalente futuro: `PATCH /api/bookings/{id}/`.
  */
@@ -248,7 +248,7 @@ export async function updateBookingStatus(
 ): Promise<Booking> {
   const bookings = readBookings();
   const booking = bookings.find((b) => b.id === id);
-  if (!booking) throw new Error('Marcação não encontrada.');
+  if (!booking) throw new Error('Agendamento não encontrado.');
 
   const updated: Booking = { ...booking, status };
   writeBookings(bookings.map((b) => (b.id === id ? updated : b)));

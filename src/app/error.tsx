@@ -34,7 +34,7 @@ export default function Error({
       <h1 className="mt-5 text-3xl">Alguma coisa correu mal</h1>
       <p className="mt-3 text-text-muted">
         Tenta outra vez. Se continuar, fala connosco pelo WhatsApp — as tuas
-        marcações não se perderam.
+        agendamentos não se perderam.
       </p>
 
       {error.digest && (

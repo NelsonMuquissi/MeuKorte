@@ -24,7 +24,7 @@ export function Footer() {
             <ul className="mt-3 space-y-2 text-sm">
               {[
                 { href: '/barbeiros', label: 'Barbeiros' },
-                { href: '/marcar', label: 'Agendar agora' },
+                { href: '/agendar', label: 'Agendar agora' },
                 { href: '/conta', label: 'A minha conta' },
               ].map((l) => (
                 <li key={l.href}>

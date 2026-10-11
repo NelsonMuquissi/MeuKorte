@@ -91,6 +91,11 @@ export function remove(key: string): void {
 export const KEYS = {
   bookings: 'bookings',
   reviews: 'reviews',
+  addresses: 'addresses',
+  /** Último telemóvel usado, para a área do cliente abrir já com a lista. */
+  lastPhone: 'last-phone',
+  /** Último nome usado, para não voltar a ser pedido a cada agendamento. */
+  lastName: 'last-name',
 } as const;
 
 /**

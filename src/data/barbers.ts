@@ -62,6 +62,7 @@ export const barbers: Barber[] = [
     services: [
       {
         id: '1-corte',
+        type: 'corte',
         name: 'Corte degradê',
         durationMinutes: 45,
         price: PRICING.standardCut,
@@ -69,6 +70,7 @@ export const barbers: Barber[] = [
       },
       {
         id: '1-corte-barba',
+        type: 'corte-barba',
         name: 'Corte + barba',
         durationMinutes: 75,
         price: PRICING.cutAndBeard,
@@ -76,6 +78,7 @@ export const barbers: Barber[] = [
       },
       {
         id: '1-barba',
+        type: 'barba',
         name: 'Barba',
         durationMinutes: 30,
         price: PRICING.beard,
@@ -83,6 +86,7 @@ export const barbers: Barber[] = [
       },
       {
         id: '1-retoque',
+        type: 'retoque',
         name: 'Retoque',
         durationMinutes: 20,
         price: PRICING.lineUp,
@@ -106,6 +110,7 @@ export const barbers: Barber[] = [
     services: [
       {
         id: '2-corte',
+        type: 'corte',
         name: 'Corte em casa',
         durationMinutes: 45,
         price: PRICING.standardCut,
@@ -113,6 +118,7 @@ export const barbers: Barber[] = [
       },
       {
         id: '2-corte-barba',
+        type: 'corte-barba',
         name: 'Corte + barba em casa',
         durationMinutes: 75,
         price: PRICING.cutAndBeard,
@@ -120,6 +126,7 @@ export const barbers: Barber[] = [
       },
       {
         id: '2-infantil',
+        type: 'infantil',
         name: 'Corte infantil',
         durationMinutes: 30,
         price: PRICING.kidsCut,
@@ -143,6 +150,7 @@ export const barbers: Barber[] = [
     services: [
       {
         id: '3-corte',
+        type: 'corte',
         name: 'Corte clássico',
         durationMinutes: 40,
         price: PRICING.standardCut,
@@ -150,6 +158,7 @@ export const barbers: Barber[] = [
       },
       {
         id: '3-barba',
+        type: 'barba',
         name: 'Barba completa',
         durationMinutes: 40,
         price: PRICING.beard,
@@ -157,12 +166,14 @@ export const barbers: Barber[] = [
       },
       {
         id: '3-corte-barba',
+        type: 'corte-barba',
         name: 'Corte + barba',
         durationMinutes: 75,
         price: PRICING.cutAndBeard,
       },
       {
         id: '3-infantil',
+        type: 'infantil',
         name: 'Corte infantil',
         durationMinutes: 30,
         price: PRICING.kidsCut,
@@ -186,24 +197,27 @@ export const barbers: Barber[] = [
     services: [
       {
         id: '4-corte',
+        type: 'corte',
         name: 'Corte degradê',
         durationMinutes: 45,
         price: PRICING.standardCut,
         description: 'Levas a foto, ele faz o corte.',
       },
       {
-        id: '4-desenho',
-        name: 'Corte + desenho',
-        durationMinutes: 60,
+        id: '4-corte-barba',
+        type: 'corte-barba',
+        name: 'Corte + barba',
+        durationMinutes: 70,
         price: PRICING.cutAndBeard,
-        description: 'Corte com desenho à navalha, à tua escolha.',
+        description: 'Corte com barba desenhada. Levas a foto, ele faz igual.',
       },
       {
         id: '4-retoque',
+        type: 'retoque',
         name: 'Retoque',
         durationMinutes: 20,
         price: PRICING.lineUp,
-        description: 'Para manter o corte afiado entre marcações.',
+        description: 'Para manter o corte afiado entre agendamentos.',
       },
     ],
   },

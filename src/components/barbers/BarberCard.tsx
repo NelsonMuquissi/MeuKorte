@@ -68,7 +68,7 @@ export function BarberCard({ barber, priority = false }: { barber: Barber; prior
 
         <p className="mt-auto pt-4 text-sm text-text-muted">
           a partir de{' '}
-          <span className="tabular text-base font-semibold text-primary">
+          <span className="tabular text-base font-semibold text-emphasis">
             {formatKz(startingPrice)}
           </span>
         </p>

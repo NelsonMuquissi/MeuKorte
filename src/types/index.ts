@@ -14,15 +14,40 @@
 /** Onde o serviço é prestado. */
 export type LocationType = 'salao' | 'domicilio';
 
-/** Ciclo de vida de uma marcação, tal como no fluxo do plano do MVP. */
+/**
+ * Tipo de serviço, independente do barbeiro.
+ *
+ * O fluxo escolhe primeiro o SERVIÇO e só depois o barbeiro, por isso é preciso
+ * um identificador comum: o cliente escolhe "Corte + Barba" e, quando escolher
+ * o barbeiro, é este tipo que encontra o serviço concreto desse profissional.
+ */
+export type ServiceType = 'corte' | 'corte-barba' | 'barba' | 'infantil' | 'retoque';
+
+/** Um estilo é de corte ou de barba. */
+export type StyleCategory = 'corte' | 'barba';
+
+/** Ciclo de vida de um agendamento, tal como no fluxo do plano do MVP. */
 export type BookingStatus = 'pendente' | 'confirmada' | 'concluida' | 'cancelada';
 
 /** Dia da semana. 0 = domingo, 6 = sábado (igual ao `Date.getDay()`). */
 export type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+/** Um estilo de corte ou de barba, escolhido no passo 2 do fluxo. */
+export interface Style {
+  id: string;
+  name: string;
+  /** Uma linha, no máximo — aparece por baixo do nome no card. */
+  description: string;
+  /** Caminho a partir de `/public`. */
+  photo: string;
+  category: StyleCategory;
+}
+
 /** Um serviço prestado por um barbeiro. */
 export interface Service {
   id: string;
+  /** Liga este serviço ao tipo escolhido no primeiro passo do fluxo. */
+  type: ServiceType;
   name: string;
   /** Duração em minutos. Define quantos intervalos da grelha o serviço ocupa. */
   durationMinutes: number;
@@ -70,7 +95,7 @@ export interface Barber {
   yearsOfExperience: number;
 }
 
-/** Uma marcação. */
+/** Umo agendamento. */
 export interface Booking {
   id: string;
   barberId: string;
@@ -78,6 +103,10 @@ export interface Booking {
   barberName: string;
   serviceId: string;
   serviceName: string;
+  /** Estilo de corte escolhido. */
+  styleName?: string;
+  /** Estilo de barba, quando o serviço a inclui. */
+  beardStyleName?: string;
   /** Preço cobrado, já com a taxa de deslocação se aplicável. */
   price: number;
   durationMinutes: number;
@@ -97,7 +126,7 @@ export interface Booking {
   createdAt: string;
 }
 
-/** Avaliação de uma marcação concluída. */
+/** Avaliação de um agendamento concluído. */
 export interface Review {
   id: string;
   bookingId: string;
@@ -116,7 +145,7 @@ export interface Review {
   createdAt: string;
 }
 
-/** Dados necessários para criar uma marcação. */
+/** Dados necessários para criar um agendamento. */
 export type BookingInput = Omit<Booking, 'id' | 'status' | 'createdAt'>;
 
 /** Filtros aceites por `barbersService.getBarbers()`. */
@@ -144,7 +173,7 @@ export interface ApiError {
   [field: string]: string[] | string | undefined;
 }
 
-/** Um intervalo de horário na grelha de marcação. */
+/** Um intervalo de horário na grelha de agendamento. */
 export interface TimeSlot {
   /** `HH:mm`. */
   time: string;

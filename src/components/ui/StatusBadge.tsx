@@ -1,7 +1,7 @@
 import type { BookingStatus } from '@/types';
 
 /**
- * Badge do estado de uma marcação.
+ * Badge do estado de um agendamento.
  *
  * Cada estado tem cor própria, mas a cor NUNCA é o único sinal: o badge leva
  * sempre um ícone com forma distinta e o nome do estado por extenso. Quem não

@@ -8,7 +8,7 @@ const siteUrl =
 /**
  * Mapa do site.
  *
- * Só entram as páginas públicas. `/minhas-marcacoes` é pessoal e os painéis são
+ * Só entram as páginas públicas. `/conta` é pessoal e os painéis são
  * demonstrações — nenhum deles tem razão para aparecer numa pesquisa.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: siteUrl, lastModified: now, changeFrequency: 'weekly', priority: 1 },
     { url: `${siteUrl}/barbeiros`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${siteUrl}/marcar`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${siteUrl}/agendar`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     ...barbers.map((barber) => ({
       url: `${siteUrl}/barbeiros/${barber.slug}`,
       lastModified: now,

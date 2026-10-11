@@ -22,7 +22,7 @@ export default async function AdminPage() {
         <header className="mb-8">
           <h1 className="text-4xl">Administração</h1>
           <p className="mt-2 text-text-muted">
-            Marcações, indicadores do teste e comissão estimada.
+            Agendamentos, indicadores do teste e comissão estimada.
           </p>
         </header>
         <AdminPanel barbers={barbers} />

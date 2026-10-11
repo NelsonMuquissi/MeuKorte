@@ -18,7 +18,7 @@ import { COMMISSION, MVP_GOALS } from '@/config/business';
 /**
  * Painel administrativo (demonstração).
  *
- * Mostra o que o plano do MVP pede: todas as marcações, os indicadores face às
+ * Mostra o que o plano do MVP pede: todos os agendamentos, os indicadores face às
  * metas dos 90 dias, a comissão estimada e a exportação dos dados.
  *
  * Os números saem do `localStorage` deste dispositivo, por isso servem para
@@ -60,7 +60,7 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
     [bookings, status, barberId, fromDate, toDate],
   );
 
-  /** Indicadores face às metas do MVP. Calculados sobre TODAS as marcações. */
+  /** Indicadores face às metas do MVP. Calculados sobre TODAS os agendamentos. */
   const metrics = useMemo(() => {
     // Cada telemóvel distinto conta como um utilizador — é a única identificação
     // que existe enquanto não há contas.
@@ -90,7 +90,7 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
   }, [bookings, reviews]);
 
   /**
-   * Exporta as marcações filtradas para CSV.
+   * Exporta os agendamentos filtradas para CSV.
    *
    * Separador `;` e BOM no início, porque é assim que o Excel em português abre
    * o ficheiro com as colunas separadas e os acentos certos.
@@ -143,7 +143,7 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Metric
-            label="Barbeiros com marcações"
+            label="Barbeiros com agendamentos"
             value={metrics.activeBarbers}
             goal={MVP_GOALS.barbers}
             suffix={` de ${MVP_GOALS.barbers}`}
@@ -156,7 +156,7 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
             hint="Telemóveis distintos"
           />
           <Metric
-            label="Marcações"
+            label="Agendamentos"
             value={metrics.totalBookings}
             goal={MVP_GOALS.bookings}
             suffix={` de ${MVP_GOALS.bookings}`}
@@ -190,7 +190,7 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
             label={`Comissão estimada (${Math.round(COMMISSION.rate * 100)}%)`}
             value={metrics.commission}
             isCurrency
-            hint="Só sobre marcações concluídas"
+            hint="Só sobre agendamentos concluídos"
           />
         </div>
 
@@ -200,10 +200,10 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
         </p>
       </section>
 
-      {/* ---- Marcações ---------------------------------------------------- */}
+      {/* ---- Agendamentos ---------------------------------------------------- */}
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 className="text-2xl">Marcações</h2>
+          <h2 className="text-2xl">Agendamentos</h2>
           <Button size="sm" variant="secondary" onClick={exportCsv} disabled={filtered.length === 0}>
             Exportar CSV ({filtered.length})
           </Button>
@@ -237,8 +237,8 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
         {filtered.length === 0 ? (
           <p className="mt-6 rounded-lg border border-dashed border-border bg-surface p-8 text-center text-text-muted">
             {bookings.length === 0
-              ? 'Ainda não há marcações neste dispositivo. Faz uma em /marcar para ver o painel a funcionar.'
-              : 'Nenhuma marcação com estes filtros.'}
+              ? 'Ainda não há agendamentos neste dispositivo. Faz um em /agendar para ver o painel a funcionar.'
+              : 'Nenhum agendamento com estes filtros.'}
           </p>
         ) : (
           <>
@@ -277,7 +277,7 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
                         </span>
                       </Td>
                       <Td><StatusBadge status={booking.status} /></Td>
-                      <Td className="tabular text-right font-semibold text-primary">
+                      <Td className="tabular text-right font-semibold text-emphasis">
                         {formatKz(booking.price)}
                       </Td>
                     </tr>
@@ -304,7 +304,7 @@ export function AdminPanel({ barbers }: { barbers: Barber[] }) {
                   </p>
                   <p className="mt-1 flex items-baseline justify-between gap-3 text-sm">
                     <span className="text-text-muted">{booking.serviceName}</span>
-                    <span className="tabular font-semibold text-primary">
+                    <span className="tabular font-semibold text-emphasis">
                       {formatKz(booking.price)}
                     </span>
                   </p>

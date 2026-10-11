@@ -1,11 +1,11 @@
 'use client';
 
 /**
- * Acesso às marcações locais a partir de componentes cliente.
+ * Acesso às agendamentos locais a partir de componentes cliente.
  *
  * Existe para que nenhum componente toque no `localStorage` nem no `storage.ts`
  * directamente, e para resolver um problema de hidratação: no servidor não há
- * marcações nenhumas, por isso o primeiro render tem de ser igual ao do servidor
+ * agendamentos nenhumas, por isso o primeiro render tem de ser igual ao do servidor
  * e só depois é que os dados entram.
  *
  * Daí o `loading` começar a `true`: enquanto for `true`, a interface mostra o
@@ -32,13 +32,13 @@ interface UseLocalBookingsResult {
   updateStatus: (id: string, status: BookingStatus) => Promise<void>;
 }
 
-/** Vai buscar as marcações: todas, ou só as de um telemóvel. */
+/** Vai buscar os agendamentos: todos, ou só os de um telemóvel. */
 function fetchBookings(phone: string | null) {
   return phone === null ? getAllBookings() : getBookingsByPhone(phone);
 }
 
 /**
- * @param phone Telemóvel do cliente. Com `null`, devolve todas as marcações —
+ * @param phone Telemóvel do cliente. Com `null`, devolve todos os agendamentos —
  *              é o que os painéis de demonstração usam.
  */
 export function useLocalBookings(phone: string | null): UseLocalBookingsResult {
@@ -75,7 +75,7 @@ export function useLocalBookings(phone: string | null): UseLocalBookingsResult {
         setError(null);
       } catch {
         if (!active) return;
-        setError('Não foi possível ler as marcações neste dispositivo.');
+        setError('Não foi possível ler os agendamentos neste dispositivo.');
         setBookings([]);
       } finally {
         if (active) setLoading(false);
@@ -94,7 +94,7 @@ export function useLocalBookings(phone: string | null): UseLocalBookingsResult {
       setBookings(response.results);
       setError(null);
     } catch {
-      setError('Não foi possível ler as marcações neste dispositivo.');
+      setError('Não foi possível ler os agendamentos neste dispositivo.');
       setBookings([]);
     } finally {
       setLoading(false);

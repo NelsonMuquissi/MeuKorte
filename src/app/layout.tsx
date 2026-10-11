@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   description:
     'Marca o teu corte com o barbeiro que quiseres, à hora que te der jeito. No salão ou em tua casa, sem filas de espera.',
   applicationName: 'Meu Korte',
-  keywords: ['barbearia', 'barbeiro', 'corte de cabelo', 'Luanda', 'Angola', 'marcação'],
+  keywords: ['barbearia', 'barbeiro', 'corte de cabelo', 'Luanda', 'Angola', 'agendamento'],
   authors: [{ name: 'Meu Korte' }],
   openGraph: {
     type: 'website',

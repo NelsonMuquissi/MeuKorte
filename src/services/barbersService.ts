@@ -53,7 +53,7 @@ export async function getBarbers(
  * Procura um barbeiro por `id` ou por `slug`.
  *
  * Aceita os dois porque a URL usa o slug (`/barbeiros/edson-kiala`) mas as
- * marcações guardam o `id`. Devolve `null` quando não existe — cabe a quem chama
+ * agendamentos guardam o `id`. Devolve `null` quando não existe — cabe a quem chama
  * decidir entre `notFound()` e uma mensagem de erro.
  *
  * Equivalente futuro: `GET /api/barbers/{id}/`

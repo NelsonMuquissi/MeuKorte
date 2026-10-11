@@ -18,9 +18,9 @@ function writeReviews(reviews: Review[]): void {
 }
 
 /**
- * Cria uma avaliação para uma marcação concluída.
+ * Cria uma avaliação para um agendamento concluído.
  *
- * Só se avalia o que já aconteceu, e só uma vez por marcação — as duas regras
+ * Só se avalia o que já aconteceu, e só uma vez por agendamento — as duas regras
  * passam para o serializer do DRF na fase seguinte.
  *
  * @param photo Foto do corte, como data URL. Na fase Django isto passa a ser um
@@ -39,14 +39,14 @@ export async function createReview(
   }
 
   const booking = await getBookingById(bookingId);
-  if (!booking) throw new Error('Marcação não encontrada.');
+  if (!booking) throw new Error('Agendamento não encontrado.');
   if (booking.status !== 'concluida') {
-    throw new Error('Só podes avaliar marcações já concluídas.');
+    throw new Error('Só podes avaliar agendamentos já concluídos.');
   }
 
   const reviews = readReviews();
   if (reviews.some((r) => r.bookingId === bookingId)) {
-    throw new Error('Esta marcação já foi avaliada.');
+    throw new Error('Este agendamento já foi avaliado.');
   }
 
   const review: Review = {
@@ -79,7 +79,7 @@ export async function getReviewsByBarber(
   return { count: results.length, next: null, previous: null, results };
 }
 
-/** A avaliação de uma marcação, se já tiver sido feita. */
+/** A avaliação de um agendamento, se já tiver sido feita. */
 export async function getReviewByBooking(bookingId: string): Promise<Review | null> {
   return readReviews().find((r) => r.bookingId === bookingId) ?? null;
 }

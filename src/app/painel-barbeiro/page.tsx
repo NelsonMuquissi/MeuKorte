@@ -17,7 +17,7 @@ export default async function BarberPanelPage() {
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
       <PinGate
         title="Painel do barbeiro"
-        description="Demonstração de como um barbeiro parceiro gere as suas marcações."
+        description="Demonstração de como um barbeiro parceiro gere os seus agendamentos."
       >
         <header className="mb-8">
           <h1 className="text-4xl">Painel do barbeiro</h1>

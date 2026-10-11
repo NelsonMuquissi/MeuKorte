@@ -132,14 +132,14 @@ export default async function BarberPage({
           </dl>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href={`/marcar?barbeiro=${barber.id}`} size="lg">
-              Marcar com este barbeiro
+            <ButtonLink href={`/agendar?barbeiro=${barber.id}`} size="lg">
+              Agendar com este barbeiro
             </ButtonLink>
             <a
               href={barberWhatsappLink(barber.name)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[52px] items-center justify-center rounded-md border border-border bg-surface-2 px-7 text-lg font-semibold text-text transition-colors hover:border-primary-dim hover:text-primary"
+              className="inline-flex min-h-[52px] items-center justify-center rounded-md border border-border bg-surface-2 px-7 text-lg font-semibold text-text transition-colors hover:border-primary-dim hover:text-emphasis"
             >
               Tirar uma dúvida
             </a>
@@ -168,7 +168,7 @@ export default async function BarberPage({
                   )}
                 </div>
                 <div className="text-right">
-                  <p className="tabular font-semibold text-primary">
+                  <p className="tabular font-semibold text-emphasis">
                     {formatKz(service.price)}
                   </p>
                   <p className="tabular text-sm text-text-muted">

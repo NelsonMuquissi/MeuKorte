@@ -44,7 +44,7 @@ function installFakeStorage(): Map<string, string> {
   return store;
 }
 
-/** Põe marcações directamente no armazenamento, sem passar pelas validações. */
+/** Põe agendamentos directamente no armazenamento, sem passar pelas validações. */
 function seedBookings(store: Map<string, string>, bookings: Partial<Booking>[]): void {
   const full = bookings.map((b, i) => ({
     id: `seed-${i}`,
@@ -123,7 +123,7 @@ describe('getAvailableSlots — grelha base', () => {
 });
 
 describe('getAvailableSlots — conflitos de horário', () => {
-  it('bloqueia a hora exacta de uma marcação existente', async () => {
+  it('bloqueia a hora exacta de um agendamento existente', async () => {
     seedBookings(store, [{ time: '10:00', durationMinutes: 45 }]);
     const slots = await getAvailableSlots(EDSON, CUT_45, WEDNESDAY, EARLY);
 
@@ -133,15 +133,15 @@ describe('getAvailableSlots — conflitos de horário', () => {
   });
 
   it('bloqueia o intervalo seguinte quando o serviço o invade', async () => {
-    // 10:00 + 45 min = 10:45, por isso as 10:30 ficam por dentro da marcação.
+    // 10:00 + 45 min = 10:45, por isso as 10:30 ficam dentro do agendamento.
     seedBookings(store, [{ time: '10:00', durationMinutes: 45 }]);
     const slots = await getAvailableSlots(EDSON, CUT_45, WEDNESDAY, EARLY);
 
     expect(slots.find((s) => s.time === '10:30')?.available).toBe(false);
   });
 
-  it('bloqueia o intervalo anterior quando o novo serviço entraria na marcação', async () => {
-    // Um corte às 09:30 acabaria às 10:15 e apanhava a marcação das 10:00.
+  it('bloqueia o intervalo anterior quando o novo serviço entraria no agendamento', async () => {
+    // Um corte às 09:30 acabaria às 10:15 e apanhava o agendamento das 10:00.
     seedBookings(store, [{ time: '10:00', durationMinutes: 45 }]);
     const slots = await getAvailableSlots(EDSON, CUT_45, WEDNESDAY, EARLY);
 
@@ -149,8 +149,8 @@ describe('getAvailableSlots — conflitos de horário', () => {
     expect(slots.find((s) => s.time === '09:00')?.available).toBe(true);
   });
 
-  it('deixa marcar quando os horários só se tocam nos limites', async () => {
-    // Marcação 10:00–10:45. Um corte às 10:45 começa exactamente no fim: sem conflito.
+  it('deixa agendar quando os horários só se tocam nos limites', async () => {
+    // Agendamento 10:00–10:45. Um corte às 10:45 começa exactamente no fim: sem conflito.
     seedBookings(store, [{ time: '10:00', durationMinutes: 45 }]);
     const slots = await getAvailableSlots(EDSON, TOUCHUP_20, WEDNESDAY, EARLY);
 
@@ -158,7 +158,7 @@ describe('getAvailableSlots — conflitos de horário', () => {
     expect(slots.find((s) => s.time === '11:00')?.available).toBe(true);
   });
 
-  it('uma marcação longa bloqueia todos os intervalos que atravessa', async () => {
+  it('um agendamento longa bloqueia todos os intervalos que atravessa', async () => {
     seedBookings(store, [{ time: '10:00', durationMinutes: 75 }]); // 10:00–11:15
     const slots = await getAvailableSlots(EDSON, TOUCHUP_20, WEDNESDAY, EARLY);
     const blocked = (t: string) => slots.find((s) => s.time === t)?.available;
@@ -169,14 +169,14 @@ describe('getAvailableSlots — conflitos de horário', () => {
     expect(blocked('11:30')).toBe(true);
   });
 
-  it('uma marcação cancelada liberta o horário', async () => {
+  it('um agendamento cancelado liberta o horário', async () => {
     seedBookings(store, [{ time: '10:00', status: 'cancelada' }]);
     const slots = await getAvailableSlots(EDSON, CUT_45, WEDNESDAY, EARLY);
 
     expect(slots.find((s) => s.time === '10:00')?.available).toBe(true);
   });
 
-  it('marcações pendentes e concluídas continuam a ocupar o horário', async () => {
+  it('agendamentos pendentes e concluídos continuam a ocupar o horário', async () => {
     seedBookings(store, [
       { time: '10:00', status: 'pendente' },
       { time: '15:00', status: 'concluida' },
@@ -187,21 +187,21 @@ describe('getAvailableSlots — conflitos de horário', () => {
     expect(slots.find((s) => s.time === '15:00')?.available).toBe(false);
   });
 
-  it('ignora marcações de outro barbeiro', async () => {
+  it('ignoro agendamentos de outro barbeiro', async () => {
     seedBookings(store, [{ time: '10:00', barberId: '4' }]);
     const slots = await getAvailableSlots(EDSON, CUT_45, WEDNESDAY, EARLY);
 
     expect(slots.find((s) => s.time === '10:00')?.available).toBe(true);
   });
 
-  it('ignora marcações noutro dia', async () => {
+  it('ignoro agendamentos noutro dia', async () => {
     seedBookings(store, [{ time: '10:00', date: '2026-10-08' }]);
     const slots = await getAvailableSlots(EDSON, CUT_45, WEDNESDAY, EARLY);
 
     expect(slots.find((s) => s.time === '10:00')?.available).toBe(true);
   });
 
-  it('várias marcações no mesmo dia bloqueiam todas as suas janelas', async () => {
+  it('vários agendamentos no mesmo dia bloqueiam todas as suas janelas', async () => {
     seedBookings(store, [
       { time: '09:00', durationMinutes: 45 }, // 09:00–09:45
       { time: '14:00', durationMinutes: 75 }, // 14:00–15:15

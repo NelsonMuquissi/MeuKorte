@@ -25,7 +25,7 @@ import {
  */
 export function BarberPanel({ barbers }: { barbers: Barber[] }) {
   const [barberId, setBarberId] = useState(barbers[0]?.id ?? '');
-  // `null` devolve todas as marcações; filtramos pelo barbeiro aqui.
+  // `null` devolve todos os agendamentos; filtramos pelo barbeiro aqui.
   const { bookings, loading, updateStatus } = useLocalBookings(null);
   const { showToast } = useToast();
 
@@ -50,7 +50,7 @@ export function BarberPanel({ barbers }: { barbers: Barber[] }) {
     [mine, today],
   );
 
-  /** Os próximos sete dias, cada um com as suas marcações. */
+  /** Os próximos sete dias, cada um com os seus agendamentos. */
   const week = useMemo(() => {
     if (!today) return [];
     const days: { date: string; bookings: Booking[] }[] = [];
@@ -124,7 +124,7 @@ export function BarberPanel({ barbers }: { barbers: Barber[] }) {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button
                     size="sm"
-                    onClick={() => change(booking, 'confirmada', 'Marcação confirmada.')}
+                    onClick={() => change(booking, 'confirmada', 'Agendamento confirmado.')}
                   >
                     Aceitar
                   </Button>
@@ -149,7 +149,7 @@ export function BarberPanel({ barbers }: { barbers: Barber[] }) {
 
         {todayBookings.length === 0 ? (
           <p className="mt-3 text-text-muted">
-            Sem marcações para hoje
+            Sem agendamentos para hoje
             {barber && barber.schedule[new Date(today).getDay() as 0].length === 0
               ? ' — é dia de folga.'
               : '.'}
@@ -164,9 +164,9 @@ export function BarberPanel({ barbers }: { barbers: Barber[] }) {
                     size="sm"
                     variant="secondary"
                     className="mt-4"
-                    onClick={() => change(booking, 'concluida', 'Marcação concluída.')}
+                    onClick={() => change(booking, 'concluida', 'Agendamento concluído.')}
                   >
-                    Marcar como concluída
+                    Agendar como concluída
                   </Button>
                 )}
               </li>
@@ -198,7 +198,7 @@ export function BarberPanel({ barbers }: { barbers: Barber[] }) {
                   <ul className="mt-3 space-y-1.5">
                     {dayBookings.map((booking) => (
                       <li key={booking.id} className="flex items-baseline gap-2 text-sm">
-                        <span className="tabular font-semibold text-primary">
+                        <span className="tabular font-semibold text-emphasis">
                           {booking.time}
                         </span>
                         <span className="truncate text-text-muted">
@@ -225,7 +225,7 @@ function BookingSummary({ booking }: { booking: Booking }) {
           <p className="font-semibold text-text">{booking.clientName}</p>
           <a
             href={`tel:${booking.clientPhone}`}
-            className="tabular text-sm text-primary underline-offset-4 hover:underline"
+            className="tabular text-sm text-emphasis underline-offset-4 hover:underline"
           >
             {formatPhone(booking.clientPhone)}
           </a>
@@ -250,7 +250,7 @@ function BookingSummary({ booking }: { booking: Booking }) {
         </div>
         <div className="flex gap-2">
           <dt className="text-text-muted">Valor</dt>
-          <dd className="tabular font-semibold text-primary">{formatKz(booking.price)}</dd>
+          <dd className="tabular font-semibold text-emphasis">{formatKz(booking.price)}</dd>
         </div>
       </dl>
 

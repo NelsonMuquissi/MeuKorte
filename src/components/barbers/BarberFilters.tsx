@@ -108,7 +108,7 @@ export function BarberFilters({ specialties, resultCount }: BarberFiltersProps) 
           <button
             type="button"
             onClick={() => router.push(pathname, { scroll: false })}
-            className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+            className="text-sm font-semibold text-emphasis underline-offset-4 hover:underline"
           >
             Limpar filtros
           </button>

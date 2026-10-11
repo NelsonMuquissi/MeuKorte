@@ -9,7 +9,7 @@ import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 
 /**
- * Formulário de avaliação de uma marcação concluída.
+ * Formulário de avaliação de um agendamento concluído.
  *
  * Estrelas de 1 a 5, comentário opcional e foto do corte — a "função adicional"
  * pedida no briefing (update de imagem do cliente).

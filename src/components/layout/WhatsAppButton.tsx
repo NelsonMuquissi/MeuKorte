@@ -1,17 +1,25 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { CONTACT } from '@/config/business';
 import { generalWhatsappLink } from '@/lib/whatsapp';
+import { isFlowRoute } from './routes';
 
 /**
  * Botão flutuante do WhatsApp.
  *
- * O atendimento do Meu Korte é por WhatsApp Business, por isso o botão está
- * presente em todas as páginas. É um `<a>` normal, sem JavaScript, por isso pode
- * ficar num Server Component.
+ * O atendimento do Meu Korte é por WhatsApp Business, por isso o botão
+ * acompanha as páginas públicas.
  *
- * Fica à esquerda em ecrãs pequenos para não ficar por cima do polegar quando se
- * desliza a página, e sobe o suficiente para não tapar nada.
+ * Desaparece dentro do fluxo de agendamento: ali ficaria por cima da grelha de
+ * horários e do "Continuar", e mandaria o cliente para uma conversa a meio de
+ * uma tarefa que já está quase feita. Saber em que rota estamos obriga a que
+ * seja um Client Component, mas é só isso — o resto é um `<a>` normal.
  */
 export function WhatsAppButton() {
+  const pathname = usePathname();
+  if (isFlowRoute(pathname)) return null;
+
   return (
     <a
       href={generalWhatsappLink()}

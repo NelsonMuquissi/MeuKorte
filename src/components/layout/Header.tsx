@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Logo } from './Logo';
+import { isFlowRoute } from './routes';
 
 /**
  * Cabeçalho, como no template: barra escura com logótipo, navegação,
@@ -26,9 +27,12 @@ const LINKS = [
   { href: '/#como-funciona', label: 'Como funciona' },
 ] as const;
 
-export function Header({ variant = 'full' }: { variant?: 'full' | 'slim' }) {
+export function Header({ variant }: { variant?: 'full' | 'slim' }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  // A rota decide, salvo quando quem usa o cabeçalho impõe a forma.
+  const shape = variant ?? (isFlowRoute(pathname) ? 'slim' : 'full');
 
   // Fecha o menu ao mudar de página. Ajustado durante o render — com um efeito,
   // o menu ficaria aberto por cima da página nova durante um render.
@@ -53,7 +57,7 @@ export function Header({ variant = 'full' }: { variant?: 'full' | 'slim' }) {
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href.replace('/#', '/'));
 
-  if (variant === 'slim') {
+  if (shape === 'slim') {
     return (
       <header data-surface="dark" className="sticky top-0 z-40 border-b border-white/10 bg-ink">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
@@ -104,7 +108,7 @@ export function Header({ variant = 'full' }: { variant?: 'full' | 'slim' }) {
             Entrar
           </Link>
           <Link
-            href="/marcar"
+            href="/agendar"
             className="inline-flex min-h-[42px] items-center rounded-md bg-gold px-5 text-sm font-bold text-ink transition-transform hover:scale-[1.03]"
           >
             Agendar agora
@@ -155,7 +159,7 @@ export function Header({ variant = 'full' }: { variant?: 'full' | 'slim' }) {
               </li>
               <li className="mt-2">
                 <Link
-                  href="/marcar"
+                  href="/agendar"
                   className="flex min-h-[50px] items-center justify-center rounded-md bg-gold px-4 font-bold text-ink"
                 >
                   Agendar agora

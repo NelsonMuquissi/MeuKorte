@@ -21,15 +21,25 @@
    um badge funcionam nas duas superfícies sem saber em qual estão, e sem uma
    única condicional no React.
 
+   As duas superfícies são DECLARADAS, nenhuma é só "o que sobra". O escuro vale
+   no `:root` por omissão e vale OUTRA VEZ em `[data-surface="dark"]`, porque as
+   variáveis CSS herdam: sem a segunda declaração, um bloco escuro dentro de uma
+   página clara continuaria a receber os tokens claros e acabava com texto quase
+   preto sobre fundo preto. É exactamente o caso do ecrã de confirmação, que é
+   escuro no meio do fluxo claro.
+
    REGRAS DE COR
      - O dourado é acento: CTA principal, item seleccionado, ícones, passos.
      - O dourado NUNCA é cor de estado.
      - O dourado NUNCA é texto sobre fundo claro (1,47:1 — ilegível). No claro
        só aparece como preenchimento, borda de selecção e ícone.
+     - Para TEXTO em destaque usa-se `text-emphasis`, nunca `text-primary`:
+       `--ui-primary` é dourado nas duas superfícies e só se lê sobre a escura.
      - Na superfície clara o botão primário do fluxo é PRETO, como no template.
    ========================================================================== */
 
-:root {
+:root,
+[data-surface="dark"] {
   /* ---- CAMADA 1: primitivas -------------------------------------------- */
 
   /* Neutros frios, do template */
@@ -75,6 +85,13 @@
   --ui-action:      var(--mk-gold);
   --ui-action-ink:  var(--mk-ink-950);
 
+  /* Texto em destaque — um preço, um total, uma ligação de apoio.
+     É um token à parte de `--ui-primary` porque tem um trabalho diferente:
+     `--ui-primary` é PREENCHIMENTO (fundo de chip, borda, estrela) e no claro
+     continua dourado; este é TEXTO e tem de se ler nas duas superfícies. Usar
+     `text-primary` para texto é o erro que este token existe para evitar. */
+  --ui-emphasis:    var(--mk-gold);      /* 12,29:1 sobre o fundo escuro */
+
   /* Selecção (card escolhido): borda dourada + fundo com tinta */
   --ui-selected-bg:     color-mix(in srgb, var(--mk-gold) 12%, var(--ui-bg));
   --ui-selected-border: var(--mk-gold);
@@ -102,6 +119,8 @@
    Aplicada com `data-surface="light"` numa página ou numa secção. Redefine só
    os tokens semânticos; nenhum componente precisa de mudar.
    -------------------------------------------------------------------------- */
+/* Mesma especificidade que `[data-surface="dark"]`; vem depois, por isso é esta
+   que ganha num elemento marcado como claro. */
 [data-surface="light"] {
   --ui-bg:         var(--mk-white);
   --ui-surface:    var(--mk-off);
@@ -121,6 +140,11 @@
   /* Botão "Continuar →": preto com texto branco, 18,04:1 */
   --ui-action:      var(--mk-ink-950);
   --ui-action-ink:  var(--mk-white);
+
+  /* No claro o destaque deixa de poder ser dourado: o `--mk-gold-mid` sobre
+     branco dá 2,07:1 e não se lê. Passa a tinta escura, que é também o que o
+     template faz — os preços e os totais do fluxo são pretos e bold. */
+  --ui-emphasis:    var(--mk-ink-950);   /* 18,04:1 */
 
   --ui-selected-bg:     var(--mk-cream);
   --ui-selected-border: var(--mk-gold-mid);
@@ -156,6 +180,7 @@
 
   --color-action: var(--ui-action);
   --color-action-ink: var(--ui-action-ink);
+  --color-emphasis: var(--ui-emphasis);
 
   --color-selected: var(--ui-selected-bg);
   --color-selected-border: var(--ui-selected-border);

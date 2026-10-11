@@ -1,7 +1,7 @@
 /**
  * Links para o WhatsApp.
  *
- * Enquanto não há backend, é o WhatsApp que faz a confirmação das marcações: o
+ * Enquanto não há backend, é o WhatsApp que faz a confirmação dos agendamentos: o
  * cliente marca no site e é levado para uma conversa com a mensagem já escrita.
  * É também o canal de atendimento previsto no plano do MVP.
  */
@@ -21,21 +21,31 @@ export function generalWhatsappLink(): string {
 }
 
 /**
- * Mensagem de confirmação de uma marcação.
+ * Mensagem de confirmação de um agendamento.
  *
  * Escrita para ser lida por uma pessoa do outro lado, não por um sistema: leva
  * tudo o que o barbeiro precisa de saber para confirmar ou recusar.
  */
 export function bookingWhatsappLink(booking: Booking): string {
   const lines = [
-    'Olá! Fiz uma marcação no Meu Korte:',
+    'Olá! Fiz um agendamento no Meu Korte:',
     '',
     `*Barbeiro:* ${booking.barberName}`,
     `*Serviço:* ${booking.serviceName}`,
+  ];
+
+  // O estilo é metade da razão de ser do fluxo: é o que poupa a conversa de
+  // "como é que querias o corte?" à porta de casa. Só aparece se foi escolhido,
+  // para os agendamentos antigos, gravados antes deste passo existir, não
+  // mostrarem uma linha vazia.
+  if (booking.styleName) lines.push(`*Estilo de corte:* ${booking.styleName}`);
+  if (booking.beardStyleName) lines.push(`*Estilo de barba:* ${booking.beardStyleName}`);
+
+  lines.push(
     `*Dia:* ${formatDateLong(booking.date)}`,
     `*Hora:* ${booking.time}`,
     `*Onde:* ${formatLocationType(booking.locationType)}`,
-  ];
+  );
 
   if (booking.locationType === 'domicilio' && booking.address) {
     lines.push(`*Morada:* ${booking.address}`);
@@ -54,7 +64,7 @@ export function bookingWhatsappLink(booking: Booking): string {
   return whatsappLink(lines.join('\n'));
 }
 
-/** Link para quem quer marcar com um barbeiro específico, vindo do perfil. */
+/** Link para quem quer agendar com um barbeiro específico, vindo do perfil. */
 export function barberWhatsappLink(barberName: string): string {
-  return whatsappLink(`Olá! Queria marcar um corte com o ${barberName}.`);
+  return whatsappLink(`Olá! Queria agendar um corte com o ${barberName}.`);
 }

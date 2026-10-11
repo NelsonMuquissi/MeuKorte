@@ -34,25 +34,29 @@ src/
 │   ├── page.tsx              /                   página inicial
 │   ├── barbeiros/            /barbeiros          lista, com filtros
 │   │   └── [id]/             /barbeiros/[slug]   perfil (generateStaticParams)
-│   ├── marcar/               /marcar             fluxo de marcação
-│   ├── minhas-marcacoes/     consultar, cancelar, avaliar
+│   ├── agendar/              /agendar            fluxo de agendamento (6 passos)
+│   ├── conta/                /conta              consultar, cancelar, avaliar
 │   ├── painel-barbeiro/      demonstração, atrás de PIN
 │   ├── admin/                demonstração, atrás de PIN
 │   ├── sitemap.ts            robots.ts, not-found.tsx, error.tsx
 │   └── globals.css           design tokens (@theme)
 ├── components/
 │   ├── ui/                   Button, Card, Modal, Toast, StatusBadge, Rating, PinGate
-│   ├── layout/               Header, Footer, WhatsAppButton
+│   ├── layout/               Header, Footer, WhatsAppButton, routes
 │   ├── home/                 Faq
 │   ├── barbers/              BarberCard, BarberList, BarberFilters, BarberReviews
-│   └── booking/              BookingFlow, MyBookings, ReviewForm, BarberPanel, AdminPanel
+│   ├── account/              AccountArea, AccountNav, AccountSummary, AccountProfile
+│   └── booking/              BookingFlow, Stepper, Calendar, SelectableCard,
+│                             BookingCard, ReviewForm, BarberPanel, AdminPanel
 ├── config/business.ts        ⚠️ preços, taxas, regras e contactos — TODOS provisórios
 ├── data/barbers.ts           4 barbeiros de demonstração
+├── data/styles.ts            estilos de corte e de barba (passo 2 do fluxo)
 ├── services/                 acesso a dados; imita uma API DRF
 │   ├── storage.ts            o único sítio que conhece o localStorage
 │   ├── barbersService.ts
 │   ├── bookingsService.ts    inclui getAvailableSlots (com testes)
-│   └── reviewsService.ts
+│   ├── reviewsService.ts
+│   └── profileService.ts     telemóvel, nome e moradas do cliente (futuro /api/me/)
 ├── types/index.ts            contrato da futura API
 ├── hooks/                    useLocalBookings, useIsClient
 └── lib/                      format (Kz, telemóvel, datas), whatsapp, image
@@ -185,16 +189,41 @@ Ambas as rotas têm `noindex` e estão no `Disallow` do `robots.txt`.
 
 Marcações e avaliações vivem no `localStorage` do navegador de cada cliente.
 Não são partilhadas entre dispositivos nem entre clientes, e perdem-se se o
-utilizador limpar os dados do navegador. A página `/minhas-marcacoes` diz isto
+utilizador limpar os dados do navegador. A página `/conta` diz isto
 ao cliente. Os indicadores do `/admin` só contam o que existe naquele
 dispositivo — servem para demonstrar o painel, não para medir o negócio.
 
 ### Fotografias
 
-As fotos em `public/barbers/` são **imagens provisórias** geradas com as
-iniciais de cada barbeiro. Substituir por fotografias reais (quadradas, pelo
-menos 800×800) antes do lançamento. O mesmo para `public/og.jpg`, que é o que
-aparece quando o link é partilhado no WhatsApp e no Instagram.
+Cinco imagens são **reais** (entregues a 11/10/2026, em `img/`); as restantes
+continuam a ser marcadores gerados com "FOTO PROVISÓRIA" escrito por cima.
+
+| Ficheiros | Estado | Para quê |
+|---|---|---|
+| `hero.jpg` | ✅ real | Fundo da página inicial. Recortado para tirar a frase gravada na imagem |
+| `servicos-destaque.jpg` | ✅ real | Painel "Qualidade · Conveniência · Estilo" |
+| `como-funciona-fundo.jpg` | ✅ real | Fundo de "Como funciona" |
+| `confianca.jpg` | ✅ real | Banner "Mais do que um corte. É confiança." |
+| `og.jpg` (em `public/`) | ✅ real | Partilha no WhatsApp e no Instagram, 1200×630 |
+| `barber-*.jpg` (4) | ⚠️ provisória | Perfil e escolha do barbeiro. Quadrada, ≥ 800×800 |
+| `style-*.jpg` (6) | ⚠️ provisória | Passo 2 do fluxo — estilo de corte. Vertical 4:5, ≥ 800×1000 |
+| `beard-*.jpg` (3) | ⚠️ provisória | Passo 2 do fluxo — estilo de barba. Vertical 4:5, ≥ 800×1000 |
+| `confirmacao-fundo.jpg` | 🗑️ sem uso | Era do ecrã de confirmação antigo. Pode apagar-se |
+
+As dos estilos são as mais urgentes: desde que o fluxo tem o passo do estilo,
+são elas que o cliente usa para decidir o corte. Um marcador cinzento não
+deixa escolher nada.
+
+**As cinco reais estão em baixa resolução** — entre 334 e 552 px de largura,
+contra os 1600 px que um fundo de largura total pede. O `next/image` amplia-as
+2× a 4×, e nota-se. Se houver os originais em tamanho maior, substituir os
+ficheiros chega: os nomes e os recortes já estão certos.
+
+**Trocar uma fotografia obriga a medir o contraste outra vez.** O texto da
+página inicial está por cima destas imagens, e os véus escuros do herói estão
+afinados ao pixel mais claro de cada foto. Quando a foto provisória, escura,
+deu lugar a esta, o parágrafo do herói caiu para 1,76:1 — bem abaixo do mínimo
+de 4,5:1 — até os véus serem reforçados.
 
 ## Fase seguinte: Django + DRF + PostgreSQL
 
