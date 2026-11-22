@@ -120,7 +120,7 @@ export default function ColoursPage() {
 
               {/* O mesmo tom como texto de destaque sobre o fundo escuro */}
               <p className="mt-4 text-2xl font-extrabold">
-                O teu barbeiro,{' '}
+                O seu barbeiro,{' '}
                 <span style={{ color: tone.hex }}>onde estiveres.</span>
               </p>
               <p className="mt-2 text-sm" style={{ color: tone.hex }}>

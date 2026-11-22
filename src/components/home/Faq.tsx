@@ -12,7 +12,10 @@ import { useState } from 'react';
 
 export interface FaqItem {
   question: string;
-  answer: string;
+  /** Um parágrafo por elemento. */
+  answer: string[];
+  /** Lista opcional depois dos parágrafos (ex.: os métodos de pagamento). */
+  list?: readonly string[];
 }
 
 export function Faq({ items }: { items: FaqItem[] }) {
@@ -40,7 +43,7 @@ export function Faq({ items }: { items: FaqItem[] }) {
                 {item.question}
                 <svg
                   viewBox="0 0 20 20"
-                  className={`size-5 shrink-0 text-primary transition-transform duration-200 ${
+                  className={`size-5 shrink-0 text-accent transition-transform duration-200 ${
                     isOpen ? 'rotate-180' : ''
                   }`}
                   aria-hidden="true"
@@ -63,9 +66,18 @@ export function Faq({ items }: { items: FaqItem[] }) {
               role="region"
               aria-labelledby={buttonId}
               hidden={!isOpen}
-              className="px-4 pb-5 text-text-muted sm:px-6"
+              className="space-y-3 px-4 pb-5 text-text-muted sm:px-6"
             >
-              {item.answer}
+              {item.answer.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+              {item.list && (
+                <ul className="list-disc space-y-1 pl-5">
+                  {item.list.map((entry) => (
+                    <li key={entry}>{entry}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </li>
         );

@@ -1,5 +1,5 @@
 /**
- * Configuração de negócio do Meu Korte.
+ * Configuração de negócio da Korte.
  *
  * Este ficheiro é a ÚNICA fonte de preços, taxas, regras e contactos.
  * Nunca escrever estes valores directamente nos componentes.
@@ -53,100 +53,46 @@ export const PRICING = {
 /**
  * Os dois serviços que abrem o fluxo de agendamento.
  *
- * No template, o primeiro passo é escolher o serviço — antes do barbeiro. Por
- * isso o serviço tem de existir independentemente de quem o presta: o preço
- * aqui é o de referência ("Desde X Kz") e o preço real vem do barbeiro
- * escolhido no passo 3.
+ * O primeiro passo é escolher o serviço — antes do barbeiro. Por isso o serviço
+ * tem de existir independentemente de quem o presta: o preço aqui é o de
+ * referência ("Desde X Kz") e o preço real vem do barbeiro escolhido.
+ *
+ * `included` é o texto do cliente (Novembro de 2026), palavra por palavra.
  */
 export const BOOKABLE_SERVICES = [
   {
     type: 'corte' as const,
     name: 'Corte de cabelo',
+    description: 'Um corte bem feito realça o seu estilo e faz toda a diferença.',
+    photo: '/images/servico-corte.jpg',
     fromPrice: PRICING.standardCut, // PROVISÓRIO — confirmar
     includesBeard: false,
     included: [
-      'Corte profissional',
-      'Acabamento com produtos de qualidade',
-      'Deslocação do barbeiro, se escolheres domicílio',
-    ], // PROVISÓRIO — confirmar
+      'Corte e acabamento profissional',
+      'Taxa de deslocação, caso opte pelo atendimento ao domicílio (apresentada no valor total antes da confirmação)',
+    ],
   },
   {
     type: 'corte-barba' as const,
     name: 'Corte + Barba',
+    description: 'O cuidado completo para um visual mais definido e confiante.',
+    photo: '/images/servico-corte-barba.jpg',
     fromPrice: PRICING.cutAndBeard, // PROVISÓRIO — confirmar
     includesBeard: true,
     included: [
-      'Corte profissional',
-      'Barba desenhada com toalha quente',
-      'Acabamento com produtos de qualidade',
-      'Deslocação do barbeiro, se escolheres domicílio',
-    ], // PROVISÓRIO — confirmar
+      'Corte e acabamento profissional',
+      'Modelação da barba',
+      'Finalização com produtos de qualidade profissional',
+      'Deslocação do barbeiro, caso opte pelo atendimento ao domicílio. O respectivo valor será incluído no total antes da confirmação do agendamento',
+    ],
   },
 ] as const;
 
-/**
- * Corte avulso — paga-se só o corte que se dá.
- * É uma das duas entradas da secção "Os nossos serviços".
+/*
+ * Os planos de assinatura e o "corte único" saíram da página inicial a pedido
+ * do cliente (Novembro de 2026). A subscrição continua a ser uma fonte de
+ * receita prevista no plano do MVP; quando voltar, volta aqui.
  */
-export const SINGLE_CUT = {
-  id: 'avulso',
-  name: 'Corte único',
-  price: PRICING.standardCut, // PROVISÓRIO — confirmar
-  description: 'Escolhe o teu estilo, o teu barbeiro e agenda o teu horário.',
-} as const;
-
-/**
- * Planos de assinatura.
- *
- * São três, como no template, e o do meio é o destacado. Os valores são todos
- * PROVISÓRIOS: os preços do template são de exemplo e não devem ser copiados.
- */
-export const SUBSCRIPTION_PLANS = [
-  {
-    id: 'fresh',
-    name: 'Plano Fresh',
-    cutsLabel: '2 cortes/mês',
-    price: 9000, // PROVISÓRIO — confirmar
-    period: 'mês',
-    includedCuts: 2, // PROVISÓRIO — confirmar
-    features: [
-      '2 cortes por mês',
-      'Escolhes o barbeiro',
-      'Agendamento prioritário',
-    ], // PROVISÓRIO — confirmar
-    highlighted: false,
-  },
-  {
-    id: 'premium',
-    name: 'Plano Premium',
-    cutsLabel: '4 cortes/mês',
-    price: 18000, // PROVISÓRIO — confirmar
-    period: 'mês',
-    includedCuts: 4, // PROVISÓRIO — confirmar
-    features: [
-      '4 cortes por mês',
-      'Barba incluída uma vez por mês',
-      'Deslocação sem custo',
-      'Agendamento prioritário',
-    ], // PROVISÓRIO — confirmar
-    highlighted: true,
-  },
-  {
-    id: 'elite',
-    name: 'Plano Elite',
-    cutsLabel: 'Cortes ilimitados',
-    price: 32000, // PROVISÓRIO — confirmar
-    period: 'mês',
-    includedCuts: null,
-    features: [
-      'Cortes sem limite',
-      'Barba sempre incluída',
-      'Deslocação sem custo',
-      'Barbeiro à tua escolha, sempre',
-    ], // PROVISÓRIO — confirmar
-    highlighted: false,
-  },
-] as const;
 
 /** Comissão retida pela plataforma sobre cado agendamento. */
 export const COMMISSION = {
@@ -157,17 +103,17 @@ export const COMMISSION = {
 /** Momento em que o cliente paga. */
 export const PAYMENT = {
   /** `on_service` = paga no fim do serviço; `on_booking` = paga ao agendar. */
-  moment: 'on_service' as 'on_service' | 'on_booking', // PROVISÓRIO — confirmar
+  moment: 'on_service' as 'on_service' | 'on_booking', // CONFIRMADO — FAQ do cliente, Nov 2026
   /** Métodos aceites, por ordem de apresentação. */
-  methods: ['Multicaixa Express', 'Transferência', 'Numerário'], // PROVISÓRIO — confirmar
+  methods: ['Multicaixa Express', 'Transferência bancária', 'Numerário'], // CONFIRMADO — FAQ do cliente, Nov 2026
 } as const;
 
 /** Regras de cancelamento, atrasos e faltas. */
 export const CANCELLATION = {
-  /** Antecedência mínima, em horas, para cancelar sem penalização. */
-  minHoursBefore: 2, // PROVISÓRIO — confirmar
-  /** Tolerância de atraso, em minutos, antes de o agendamento ser dada como falta. */
-  lateToleranceMinutes: 15, // PROVISÓRIO — confirmar
+  /** Antecedência mínima, em horas, para cancelar ou alterar. */
+  minHoursBefore: 6, // CONFIRMADO — FAQ do cliente, Nov 2026
+  /** Tolerância de atraso, em minutos. */
+  lateToleranceMinutes: 15, // CONFIRMADO — FAQ do cliente, Nov 2026
   /** Há penalização por falta sem aviso? */
   noShowPenalty: false, // PROVISÓRIO — confirmar
 } as const;
@@ -216,17 +162,29 @@ export const CLAIMS = {
   barbersFallbackText: 'Profissionais parceiros em Luanda',
 
   /** Agendamento. Descreve o que o cliente faz, sem prometer tempo. */
-  bookingText: 'Escolhes o barbeiro, o estilo e a hora', // PROVISÓRIO — confirmar
+  bookingText: 'Escolha o barbeiro, o estilo e a hora', // PROVISÓRIO — confirmar
 
   /** Deslocação ao domicílio. */
-  homeServiceText: 'Em tua casa ou no salão', // PROVISÓRIO — confirmar
+  homeServiceText: 'Em sua casa ou no salão', // PROVISÓRIO — confirmar
 
   /**
    * Pagamento. O texto segue `PAYMENT.moment` — ver `paymentClaim()` abaixo,
    * que é o que a interface deve usar.
    */
-  paymentOnServiceText: 'Pagas no fim do serviço', // PROVISÓRIO — confirmar
-  paymentOnBookingText: 'Pagas no momento do agendamento', // PROVISÓRIO — confirmar
+  paymentOnServiceText: 'O pagamento é efectuado no final do serviço, directamente ao barbeiro', // PROVISÓRIO — confirmar
+  paymentOnBookingText: 'O pagamento é efectuado no momento do agendamento', // PROVISÓRIO — confirmar
+
+  /**
+   * Painel "Mais do que um corte, é confiança." da secção de serviços.
+   * Texto do cliente (`Serviços de Barbearia MeuKorte.png`). A higiene é uma
+   * promessa concreta: só fica se for verdade em todos os barbeiros.
+   */
+  trustPanel: [
+    { title: 'Profissionais de confiança', text: 'Barbeiros experientes e certificados' }, // PROVISÓRIO — confirmar
+    { title: 'Higiene e segurança', text: 'Todos os equipamentos são esterilizados' }, // PROVISÓRIO — confirmar
+    { title: 'Atendimento rápido', text: 'No seu tempo, sem complicações' },
+    { title: 'Estilo ao seu alcance', text: 'Corte, barba e muito mais' },
+  ],
 } as const;
 
 /** A frase de pagamento certa para a regra actualmente em vigor. */

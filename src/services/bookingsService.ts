@@ -245,7 +245,7 @@ export async function createBooking(data: BookingInput): Promise<Booking> {
   const slots = await getAvailableSlots(data.barberId, data.serviceId, data.date);
   const slot = slots.find((s) => s.time === data.time);
   if (!slot || !slot.available) {
-    throw new Error('Esse horário já não está disponível. Escolhe outro.');
+    throw new Error('Esse horário já não está disponível. Escolha outro.');
   }
 
   const booking: Booking = {
@@ -321,7 +321,7 @@ export async function cancelBooking(id: string): Promise<Booking> {
 
   if (!canCancel(booking)) {
     throw new Error(
-      `Só é possível cancelar com ${CANCELLATION.minHoursBefore}h de antecedência. Fala connosco pelo WhatsApp.`,
+      `Só é possível cancelar com ${CANCELLATION.minHoursBefore}h de antecedência. Fale connosco pelo WhatsApp.`,
     );
   }
 

@@ -1,4 +1,8 @@
-# Meu Korte
+# Korte.
+
+A marca é **Korte.** (com o ponto dourado). Até Novembro de 2026 chamava-se
+"Meu Korte"; o nome antigo ainda aparece no domínio, no email e nas redes
+(`business.ts`), à espera de confirmação.
 
 Plataforma angolana de marcação de cortes de cabelo com barbeiros.
 
@@ -29,12 +33,17 @@ mais baixo — o valor aqui está na conveniência e na poupança de tempo.
 
 **Duas jornadas, porque há duas perguntas.** Quem quer o barbeiro em casa pergunta
 "quem me vai cortar?"; quem vai ao salão pergunta "qual é a casa mais perto de mim?".
-A página inicial separa-as logo no herói, e cada uma começa onde o seu cliente começa:
+A página inicial separa-as na secção "Os nossos serviços", logo abaixo do herói
+(um card para cada), e cada uma começa onde o seu cliente começa:
 
 | Jornada | Rota | Passos |
 |---|---|---|
 | **Domicílio** | `/agendar` | Serviço → Estilo → Barbeiro → Agendamento → Localização → Confirmação |
-| **Salão** | `/salao` | Barbearia → Formato → Corte → Barbeiro e hora → Confirmação |
+| **Salão** | `/salao` | Barbearia → Serviço → Estilo → Barbeiro e hora → Confirmação |
+
+A jornada do salão é **sempre no salão**: o passo "No salão ou em sua casa?"
+saiu a pedido do cliente. Os passos Serviço, Estilo e o resumo são as mesmas
+peças nas duas jornadas (`src/components/booking/FlowParts.tsx`).
 
 Na jornada do salão o **barbeiro é opcional**: há "qualquer um disponível", que
 reúne as horas livres da casa inteira e só atribui o profissional na confirmação.
@@ -65,44 +74,55 @@ cliente avalia.
 
 ## Referência de design
 
-**Os templates em `docs/template/` são a fonte de verdade** para layout, fluxo e
-componentes — no que eles cobrem, que é a jornada do domicílio e a área do cliente.
+**As referências de Novembro de 2026 em `Novas_Referencias/` são a fonte de
+verdade.** A pasta é **local e não entra no git** (está em `.git/info/exclude`).
+Substituem os templates antigos de `docs/template/` onde se sobrepõem.
 
-**A jornada do salão (`/salao`) não está nos templates.** É uma decisão de produto
-posterior, e por isso não há template para consultar: reutiliza as mesmas peças
-(`Stepper`, `SelectableCard`, `Calendar`) e as mesmas regras de cor, mas a ordem
-dos passos é a que está na tabela acima, não a dos nove ecrãs. Quando houver dúvida sobre como algo deve ser apresentado, a
-resposta está no template, não no gosto de quem implementa.
-
-| Ficheiro | O que é |
+| Ficheiro em `Novas_Referencias/` | O que é |
 |---|---|
-| `image1.png` | Logótipo: monograma MK prateado, "MEUKORTE", assinatura "O teu barbeiro, à tua maneira" |
-| `image2.jpeg` | Template 1 |
-| `image3.jpeg` | **Template 2 — a base.** Nove ecrãs: home, fluxo de agendamento completo e área do cliente |
+| `Korte. Minimalist Gold-Dot Wordmark.png` | Logótipo "Korte." → `public/brand/korte*.png` |
+| `Barber Landing Page Hero Design.png` | Herói da página inicial |
+| `Serviços de Barbearia MeuKorte.png` | "Os nossos serviços": domicílio, salão e painel "confiança" |
+| `Como Funciona_ Agendamento de Barbeiro.png` | "Como funciona" |
+| `Meet Talatona's Best Barbers.png` | Cards dos barbeiros (home e `/barbeiros`) |
+| `Modern Barber Booking Service Selection.png` | Passo "Serviço" |
+| `Korte. Estilo de Corte Premium.png` | Passo "Estilo" |
+| `Modern Barber Booking Confirmation.png` | "Tudo pronto!" (resumo) |
+| `Agendamento de Barbeiro Confirmado.png` | Ecrã final |
+| `FAQS.txt` | Texto das perguntas frequentes |
+| `WhatsApp Image *.jpeg`, `Screenshot *.png` | Pedidos do cliente: o que está riscado a vermelho é para sair |
 
-As imagens estavam embebidas no `Projecto - Meu Korte.docx` e foram extraídas
-para `docs/template/`.
+**Saiu, a pedido do cliente:** planos de assinatura, banner "Mais do que um
+corte. É confiança." (escuro), frase debaixo do logótipo no rodapé, filtros da
+lista de barbeiros, passo "Formato" do salão.
 
-**"Barbearia Online" e "BarberPro" são placeholders** que aparecem nos
-templates. A marca é **Meu Korte** e o logótipo é o de `image1.png`.
+### Superfícies
 
-### Duas superfícies
+- **Clara (por omissão)** — o site inteiro: fundo creme `#F7F5F2`, cards
+  brancos com borda subtil.
+- **Escura** (`data-surface="dark"`) — só o cabeçalho dos fluxos, o rodapé e a
+  barra lateral da conta. Fundo `#12171B`.
 
-O produto tem dois registos visuais, e cada ecrã pertence a um deles:
+O cabeçalho das páginas públicas é claro; nos fluxos (`/agendar`, `/salao`)
+encolhe e fica escuro, com o logótipo branco.
 
-- **Escura** — home, hero, "como funciona", planos, banners, ecrã de
-  confirmação, cabeçalho e barra lateral. Fundo `#12171B`.
-- **Clara** — todo o fluxo de agendamento e a área do cliente. Fundo branco,
-  cards com borda subtil, botão primário preto "Continuar →".
+### Cor
 
-O **dourado `#F9CE97`** é acento: CTA principal, item seleccionado (borda
-dourada + visto), ícones e números de passo. **Nunca é cor de estado**, e
-**nunca é texto sobre fundo claro** (1,47:1 — ilegível).
+O **dourado `#C7914A`** (o ponto do logótipo) é preenchimento: CTA, item
+seleccionado, stepper, ícones. **Nunca é cor de estado.**
 
-### Terminologia
+- Texto sobre o dourado é a tinta escura (6,5:1). **Branco sobre dourado não**
+  (2,8:1) — as referências mostram-no, mas não se lê.
+- Dourado como **texto** sobre o claro usa-se `text-accent` (`#94622A`, 4,6:1),
+  nunca `text-gold` (2,55:1). É o que pinta "onde estiver.", os rótulos dos
+  passos e os preços dos cards.
 
-Na interface diz-se **"agendamento"**, como nos templates. No código mantém-se
-`booking`.
+### Terminologia e tom
+
+Na interface diz-se **"agendamento"**. No código mantém-se `booking`.
+
+O tom é **formal**, como nas referências e no texto do cliente: "o seu
+barbeiro", "para si", "Escolha", "Agende". Não "o teu", "Escolhe".
 
 ## Regras Next.js
 
@@ -117,12 +137,10 @@ Na interface diz-se **"agendamento"**, como nos templates. No código mantém-se
 ## Convenções
 
 - Tailwind com design tokens definidos no `globals.css` (`@theme`), em duas
-  superfícies (escura e clara) — ver "Referência de design".
+  superfícies (clara por omissão, escura) — ver "Referência de design".
 - **Mobile-first**: a maioria dos utilizadores usa telemóvel. Verificar a 360px.
-- Texto da interface em **português de Angola**: "telemóvel", "actualizar",
-  "ecrã", "contacto". Nunca "celular", "atualizar".
-- Na interface diz-se **"agendamento"**, seguindo os templates. No código o tipo
-  continua a chamar-se `Booking`.
+- Texto da interface em **português de Angola**, tom formal: "telemóvel",
+  "actualizar", "ecrã", "contacto". Nunca "celular", "atualizar".
 - Moeda **Kwanza**, formato `5 000 Kz` (espaço como separador de milhares).
 - Telefones **+244**. `<html lang="pt-AO">`.
 - **Código, nomes de ficheiros e componentes em inglês; rotas (URLs) em português.**
@@ -132,7 +150,7 @@ Na interface diz-se **"agendamento"**, como nos templates. No código mantém-se
 | Rota | Conteúdo |
 |---|---|
 | `/` | Página inicial — recebe o tráfego do Instagram e do TikTok |
-| `/barbeiros` | Lista de barbeiros, com filtros |
+| `/barbeiros` | Lista de barbeiros |
 | `/barbeiros/[id]` | Perfil do barbeiro (`generateStaticParams`) |
 | `/agendar` | Jornada do domicílio (aceita `?barbeiro=id`) |
 | `/salao` | Jornada do salão (aceita `?barbearia=id`) |
@@ -144,8 +162,10 @@ Na interface diz-se **"agendamento"**, como nos templates. No código mantém-se
 
 ## Decisões em aberto
 
-Zona piloto, preços, formato (salão/domicílio/ambos), taxa de deslocação, comissão,
-momento do pagamento e regras de cancelamento **ainda não estão definidos**.
+Zona piloto, preços, formato (salão/domicílio/ambos), taxa de deslocação e
+comissão **ainda não estão definidos**. O momento do pagamento, os métodos e as
+regras de cancelamento (6 h, 15 min de tolerância) foram confirmados pelo
+cliente nas FAQ de Novembro de 2026.
 
 Ficam todos em `src/config/business.ts` com valores **provisórios**, cada um com o
 comentário `// PROVISÓRIO — confirmar`.

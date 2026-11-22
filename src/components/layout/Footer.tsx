@@ -3,7 +3,11 @@ import { Logo } from './Logo';
 import { CONTACT, PILOT_AREA } from '@/config/business';
 import { generalWhatsappLink } from '@/lib/whatsapp';
 
-/** Rodapé. Sempre escuro, como o cabeçalho. Server Component. */
+/**
+ * Rodapé. Escuro, com o logótipo claro. Server Component.
+ *
+ * Sem frase de apresentação debaixo do logótipo: o cliente pediu para a tirar.
+ */
 export function Footer() {
   const year = new Date().getFullYear();
 
@@ -12,11 +16,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Logo size="full" asLink={false} />
-            <p className="mt-4 max-w-xs text-sm text-text-muted">
-              Cortes, barba e estilo com qualidade profissional, no conforto da
-              tua casa ou no salão.
-            </p>
+            <Logo variant="light" size="lg" asLink={false} />
           </div>
 
           <nav aria-labelledby="footer-nav">
@@ -28,7 +28,7 @@ export function Footer() {
                 { href: '/conta', label: 'A minha conta' },
               ].map((l) => (
                 <li key={l.href}>
-                  <Link href={l.href} className="text-text-muted transition-colors hover:text-gold">
+                  <Link href={l.href} className="text-text-muted transition-colors hover:text-accent">
                     {l.label}
                   </Link>
                 </li>
@@ -44,13 +44,13 @@ export function Footer() {
                   href={generalWhatsappLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-text-muted transition-colors hover:text-gold"
+                  className="text-text-muted transition-colors hover:text-accent"
                 >
                   WhatsApp {CONTACT.whatsappDisplay}
                 </a>
               </li>
               <li>
-                <a href={`mailto:${CONTACT.email}`} className="text-text-muted transition-colors hover:text-gold">
+                <a href={`mailto:${CONTACT.email}`} className="text-text-muted transition-colors hover:text-accent">
                   {CONTACT.email}
                 </a>
               </li>
@@ -68,7 +68,7 @@ export function Footer() {
                   href={`https://instagram.com/${CONTACT.instagram}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-text-muted transition-colors hover:text-gold"
+                  className="text-text-muted transition-colors hover:text-accent"
                 >
                   Instagram
                 </a>
@@ -78,7 +78,7 @@ export function Footer() {
                   href={`https://tiktok.com/@${CONTACT.tiktok}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-text-muted transition-colors hover:text-gold"
+                  className="text-text-muted transition-colors hover:text-accent"
                 >
                   TikTok
                 </a>
@@ -88,7 +88,7 @@ export function Footer() {
         </div>
 
         <p className="mt-10 border-t border-white/10 pt-6 text-xs text-text-muted">
-          © {year} Meu Korte · Luanda, Angola
+          © {year} Korte. · Luanda, Angola
         </p>
       </div>
     </footer>

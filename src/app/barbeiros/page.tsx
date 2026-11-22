@@ -1,28 +1,29 @@
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
-import { BarberList } from '@/components/barbers/BarberList';
+import { BarberCard } from '@/components/barbers/BarberCard';
 import { getBarbers } from '@/services/barbersService';
-import { allSpecialties } from '@/data/barbers';
+import { PILOT_AREA } from '@/config/business';
 
 export const metadata: Metadata = {
   title: 'Barbeiros',
   description:
-    'Conhece os barbeiros do Meu Korte em Luanda. Vê especialidades, preços e avaliações, e marca com quem quiseres.',
+    'Conheça os barbeiros da Korte em Luanda. Veja as avaliações, a zona e o preço, e agende com quem preferir.',
   alternates: { canonical: '/barbeiros' },
   openGraph: {
-    title: 'Barbeiros · Meu Korte',
-    description: 'Escolhe o barbeiro que quiseres e marca à hora que te der jeito.',
+    title: 'Barbeiros · Korte',
+    description: 'Escolha o barbeiro que preferir e agende à hora que lhe convier.',
     url: '/barbeiros',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Meu Korte' }],
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Korte.' }],
   },
 };
 
 /**
- * Lista de barbeiros.
+ * Lista de barbeiros — o mesmo desenho da secção "Os nossos barbeiros" da
+ * página inicial (`Meet Talatona's Best Barbers.png`).
  *
- * Server Component: vai buscar os barbeiros ao serviço no momento do build e
- * entrega-os já prontos ao `BarberList`, que trata dos filtros no cliente.
- * Assim a página fica estática e o HTML gerado traz a lista completa.
+ * Sem filtros: o cliente riscou a versão anterior, com filtros de atendimento
+ * e especialidade. Com quatro barbeiros, os cards dizem tudo de uma vez.
+ *
+ * Server Component, estática.
  */
 export default async function BarbersPage() {
   const { results: barbers } = await getBarbers();
@@ -30,17 +31,20 @@ export default async function BarbersPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <header>
-        <h1 className="text-4xl sm:text-5xl">Barbeiros</h1>
-        <p className="mt-3 max-w-lg text-text-muted">
-          Vê o trabalho de cada um, os preços e as avaliações. Marca com quem quiseres.
+        <h1 className="text-4xl sm:text-5xl">
+          Os nossos <span className="text-accent">barbeiros</span>
+        </h1>
+        <p className="mt-3 max-w-lg text-lg text-text-muted">
+          Profissionais escolhidos a dedo para o arranque em {PILOT_AREA.district}.
+          Veja as avaliações e agende com quem preferir.
         </p>
       </header>
 
-      {/* `useSearchParams` dentro do BarberList obriga a um limite de Suspense
-          para a página poder continuar a ser pré-renderizada. */}
-      <Suspense fallback={<div className="mt-8 h-96" />}>
-        <BarberList barbers={barbers} specialties={allSpecialties} />
-      </Suspense>
+      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {barbers.map((barber, index) => (
+          <BarberCard key={barber.id} barber={barber} priority={index < 2} />
+        ))}
+      </div>
     </div>
   );
 }

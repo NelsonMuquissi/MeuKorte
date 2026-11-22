@@ -61,8 +61,8 @@ export function BarberReviews({ barberId }: { barberId: string }) {
   if (reviews.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-border bg-surface p-6 text-sm text-text-muted">
-        Ainda não há avaliações feitas neste dispositivo. Depois do teu corte,
-        podes avaliar em &quot;Os meus agendamentos&quot;.
+        Ainda não há avaliações feitas neste dispositivo. Depois do seu corte,
+        pode avaliar em &quot;Os meus agendamentos&quot;.
       </p>
     );
   }

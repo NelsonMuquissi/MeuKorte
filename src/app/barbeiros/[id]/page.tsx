@@ -47,7 +47,7 @@ export async function generateMetadata({
     alternates: { canonical: `/barbeiros/${barber.slug}` },
     openGraph: {
       type: 'profile',
-      title: `${barber.name} · Meu Korte`,
+      title: `${barber.name} · Korte`,
       description,
       url: `/barbeiros/${barber.slug}`,
       // A foto do barbeiro é o que aparece quando o link é partilhado no

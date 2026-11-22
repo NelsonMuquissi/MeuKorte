@@ -73,7 +73,7 @@ export function BookingCard({
       {review && (
         <div className="mt-4 rounded-md border border-border bg-surface-2 p-3">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-text-muted">A tua avaliação:</span>
+            <span className="text-sm text-text-muted">A sua avaliação:</span>
             <Rating value={review.rating} />
           </div>
           {review.comment && (
@@ -111,7 +111,7 @@ export function BookingCard({
           booking.status !== 'concluida' && (
             <p className="self-center text-xs text-text-muted">
               Já não dá para cancelar aqui ({CANCELLATION.minHoursBefore}h de
-              antecedência). Fala connosco pelo WhatsApp.
+              antecedência). Fale connosco pelo WhatsApp.
             </p>
           )}
       </div>

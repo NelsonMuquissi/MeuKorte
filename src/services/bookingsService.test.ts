@@ -13,6 +13,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getAvailableSlots, getShopSlots, createBooking, canCancel } from './bookingsService';
 import { KEYS } from './storage';
 import type { Booking } from '@/types';
+import { CANCELLATION } from '@/config/business';
 
 /** Quarta-feira. Edson trabalha 09:00–13:00 e 14:00–19:00. */
 const WEDNESDAY = '2026-10-07';
@@ -311,12 +312,16 @@ describe('canCancel', () => {
     status: 'confirmada',
   } as Booking;
 
+  // O agendamento é às 15:00; a janela vem de `business.ts`.
+  const hours = CANCELLATION.minHoursBefore;
+  const at = (hoursBefore: number) => new Date(2026, 9, 7, 15 - hoursBefore, 0);
+
   it('deixa cancelar com antecedência suficiente', () => {
-    expect(canCancel(booking, new Date(2026, 9, 7, 10, 0))).toBe(true);
+    expect(canCancel(booking, at(hours + 1))).toBe(true);
   });
 
-  it('não deixa cancelar dentro das 2 horas anteriores', () => {
-    expect(canCancel(booking, new Date(2026, 9, 7, 13, 30))).toBe(false);
+  it('não deixa cancelar dentro da janela mínima', () => {
+    expect(canCancel(booking, new Date(at(hours).getTime() + 30 * 60 * 1000))).toBe(false);
   });
 
   it('não deixa cancelar o que já foi concluído ou cancelado', () => {

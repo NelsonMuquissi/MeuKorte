@@ -41,7 +41,7 @@ export async function createReview(
   const booking = await getBookingById(bookingId);
   if (!booking) throw new Error('Agendamento não encontrado.');
   if (booking.status !== 'concluida') {
-    throw new Error('Só podes avaliar agendamentos já concluídos.');
+    throw new Error('Só pode avaliar agendamentos já concluídos.');
   }
 
   const reviews = readReviews();
