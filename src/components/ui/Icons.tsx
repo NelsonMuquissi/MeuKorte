@@ -233,3 +233,103 @@ export function SignOut({ className, style }: IconProps) {
     </svg>
   );
 }
+
+/* ---- Acrescentados com as referências de Novembro de 2026 ---------------- */
+
+/** Calendário — o "Agendar agora" e a data no resumo. */
+export function CalendarIcon({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M8 3v4M16 3v4M4 10h16" />
+    </svg>
+  );
+}
+
+/** Escudo com visto — profissionais de confiança, higiene. */
+export function ShieldCheck({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <path d="M12 3.5 5 6v5.5c0 4.2 2.9 7.6 7 9 4.1-1.4 7-4.8 7-9V6l-7-2.5Z" />
+      <path d="m9 12 2.2 2.2L15.2 10" />
+    </svg>
+  );
+}
+
+/** Coração — estilo ao seu alcance. */
+export function Heart({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z" />
+    </svg>
+  );
+}
+
+/** Lápis — "Outro estilo", descrito pelo cliente. */
+export function Pencil({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3Z" />
+      <path d="m14.5 7.5 3 3" />
+    </svg>
+  );
+}
+
+/** Informação — notas de política no resumo. */
+export function Info({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 11v5M12 8h.01" />
+    </svg>
+  );
+}
+
+/** Cartão — forma de pagamento. */
+export function CreditCard({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+      <path d="M3.5 10h17M7 15h3" />
+    </svg>
+  );
+}
+
+/** Barba desenhada — a preferência do passo do estilo. */
+export function Beard({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <path d="M5.5 6v5a6.5 6.5 0 0 0 13 0V6" />
+      <path d="M5.5 9.5c2 1.3 3.6 1.6 6.5 1.6s4.5-.3 6.5-1.6" />
+      <path d="M9.5 15c1.6.8 3.4.8 5 0" />
+    </svg>
+  );
+}
+
+/** Seta para a direita, para ligações "Ver todos →". */
+export function ArrowRightIcon({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <path d="M5 12h14m0 0-5-5m5 5-5 5" />
+    </svg>
+  );
+}
+
+/** Seta para a direita, sem haste — chevron de uma linha clicável. */
+export function ChevronRight({ className, style }: IconProps) {
+  return (
+    <svg {...base(className, style)}>
+      <path d="m9 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+/** Logótipo do WhatsApp, cheio. Para os botões que abrem a conversa. */
+export function WhatsApp({ className = 'size-6', style }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} style={style} fill="currentColor" aria-hidden="true">
+      <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.05 1.02-1.05 2.5s1.08 2.9 1.23 3.1c.15.2 2.12 3.24 5.14 4.54.72.31 1.28.5 1.71.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35z" />
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23z" />
+    </svg>
+  );
+}

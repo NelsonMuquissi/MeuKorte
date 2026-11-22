@@ -6,13 +6,13 @@ import { getBarbers } from '@/services/barbersService';
 export const metadata: Metadata = {
   title: 'Agendar agora',
   description:
-    'Marca o teu corte em Luanda: escolhe o serviço, o estilo, o barbeiro e a hora. No salão ou em tua casa.',
+    'Agende o seu corte em Luanda: escolha o serviço, o estilo, o barbeiro e a hora. No local da sua preferência.',
   alternates: { canonical: '/agendar' },
   openGraph: {
-    title: 'Agendar agora · Meu Korte',
-    description: 'Escolhe o serviço, o estilo, o barbeiro e a hora.',
+    title: 'Agendar agora · Korte',
+    description: 'Escolha o serviço, o estilo, o barbeiro e a hora.',
     url: '/agendar',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Meu Korte' }],
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Korte.' }],
   },
 };
 
@@ -23,15 +23,15 @@ export const metadata: Metadata = {
  * que é cliente. A página continua estática — o `?barbeiro=` é lido no cliente,
  * dentro do `BookingFlow`.
  *
- * Superfície CLARA, como todo o fluxo no template. O cabeçalho mantém-se escuro
- * por cima dela: trata disso sozinho, forçando o seu próprio `data-surface`.
+ * Superfície clara, como o resto do site. O cabeçalho dos fluxos é escuro:
+ * trata disso sozinho, forçando o seu próprio `data-surface`.
  */
 export default async function BookingPage() {
   const { results: barbers } = await getBarbers();
 
   return (
-    <div data-surface="light" className="min-h-[70vh]">
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="min-h-[70vh]">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
         <h1 className="sr-only">Agendar um corte</h1>
 
         <Suspense fallback={<div className="h-96" aria-hidden="true" />}>

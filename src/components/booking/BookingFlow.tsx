@@ -4,16 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useIsClient } from '@/hooks/useIsClient';
-import type {
-  Barber,
-  Booking,
-  LocationType,
-  Service,
-  ServiceType,
-  Style,
-  TimeSlot,
-} from '@/types';
-import { haircutStyles, beardStyles, getStyleById } from '@/data/styles';
+import type { Barber, Booking, LocationType, Service, ServiceType, TimeSlot } from '@/types';
+import { beardDesign } from '@/data/styles';
 import { getAvailableSlots, createBooking, calculatePrice } from '@/services/bookingsService';
 import {
   ADDRESS_SLOTS,
@@ -24,34 +16,37 @@ import {
   setLastName,
   setLastPhone,
 } from '@/services/profileService';
-import { bookingWhatsappLink } from '@/lib/whatsapp';
 import {
   formatKz,
   formatDuration,
-  formatDateLong,
   toISODate,
   parseDate,
   isValidPhone,
   formatLocationType,
 } from '@/lib/format';
-import {
-  BOOKABLE_SERVICES,
-  BOOKING_WINDOW_DAYS,
-  PRICING,
-  PAYMENT,
-  PILOT_AREA,
-  paymentClaim,
-} from '@/config/business';
-import { Button, ButtonLink, ArrowRight } from '@/components/ui/Button';
+import { BOOKABLE_SERVICES, BOOKING_WINDOW_DAYS, PRICING, PILOT_AREA } from '@/config/business';
 import { Stepper, STEPS, type StepIndex } from './Stepper';
-import { SelectableCard, SelectionMark } from './SelectableCard';
+import { SelectableCard } from './SelectableCard';
 import { Calendar } from './Calendar';
+import {
+  StepPanel,
+  FlowNav,
+  ServiceChooser,
+  StyleChooser,
+  styleBlocker,
+  styleLabel,
+  SlotGrid,
+  Field,
+  BookingReview,
+  BookingConfirmed,
+  dateLabel,
+} from './FlowParts';
 import { Rating } from '@/components/ui/Rating';
-import { HeadCut, HeadBeard, Check, MapPin, HomePin } from '@/components/ui/Icons';
+import { MapPin, HomePin } from '@/components/ui/Icons';
 import { useToast } from '@/components/ui/Toast';
 
 /**
- * Fluxo de agendamento — os seis passos do template, um ecrã de cada vez.
+ * Jornada do domicílio — seis passos, um ecrã de cada vez.
  *
  *   Serviço → Estilo → Barbeiro → Agendamento → Localização → Confirmação
  *
@@ -60,16 +55,16 @@ import { useToast } from '@/components/ui/Toast';
  * esconde o que falta decidir. Com um passo de cada vez há sempre uma só
  * pergunta à vista, e o `Stepper` mostra onde se está.
  *
- * A ordem é a do template e não é arbitrária: o serviço escolhe-se antes do
- * barbeiro, por isso o tipo de serviço (`ServiceType`) existe ao nível da
- * plataforma, em `BOOKABLE_SERVICES`, e só no passo 3 — quando já há barbeiro —
- * é que se encontra o `Service` concreto, com o preço e a duração reais desse
- * profissional. Daí "Desde X Kz" no primeiro passo.
+ * O serviço escolhe-se antes do barbeiro, por isso o tipo de serviço
+ * (`ServiceType`) existe ao nível da plataforma, em `BOOKABLE_SERVICES`, e só
+ * no passo 3 — quando já há barbeiro — é que se encontra o `Service` concreto,
+ * com o preço e a duração reais desse profissional. Daí "Desde X Kz" no
+ * primeiro passo.
  *
- * Nenhum preço, taxa ou regra está escrito aqui: vêm todos de `business.ts`.
+ * O desenho de cada passo vive em `FlowParts`, partilhado com a jornada do
+ * salão. Nenhum preço, taxa ou regra está escrito aqui: vêm de `business.ts`.
  */
 
-/** Um passo do fluxo. A ordem é a de `STEPS`, no `Stepper`. */
 const LAST_STEP = (STEPS.length - 1) as StepIndex;
 
 export function BookingFlow({ barbers }: { barbers: Barber[] }) {
@@ -81,7 +76,8 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
   const [step, setStep] = useState<StepIndex>(0);
   const [serviceType, setServiceType] = useState<ServiceType | null>(null);
   const [styleId, setStyleId] = useState<string | null>(null);
-  const [beardStyleId, setBeardStyleId] = useState<string | null>(null);
+  const [otherStyle, setOtherStyle] = useState('');
+  const [beard, setBeard] = useState(false);
   const [barberId, setBarberId] = useState<string | null>(null);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -98,7 +94,7 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
 
   /* ---- Valores derivados ------------------------------------------------ */
   const bookable = BOOKABLE_SERVICES.find((s) => s.type === serviceType) ?? null;
-  const needsBeardStyle = bookable?.includesBeard ?? false;
+  const includesBeard = bookable?.includesBeard ?? false;
 
   /** Só entram barbeiros que prestem mesmo o serviço escolhido. */
   const eligibleBarbers = useMemo(
@@ -116,12 +112,11 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
 
   /* ---- Recuperação do que já se sabe do cliente ------------------------- */
   /**
-   * O telemóvel do último agendamento, para não o escrever outra vez.
+   * O telemóvel e o nome do último agendamento, para não os escrever outra vez.
    *
-   * Só existe no cliente, por isso passa pelo `useIsClient` em vez de um efeito
-   * com `setState` — é o padrão usado no resto da aplicação. O `undefined`
-   * quer dizer "ainda não foi tocado": nesse caso vale o número guardado, e
-   * assim não é preciso copiar o valor guardado para dentro do estado.
+   * Só existem no cliente, por isso passam pelo `useIsClient` em vez de um
+   * efeito com `setState`. O `undefined` quer dizer "ainda não foi tocado":
+   * nesse caso vale o valor guardado.
    */
   const savedPhone = useMemo(() => (isClient ? getLastPhone() : null), [isClient]);
   const [phoneOverride, setPhone] = useState<string | undefined>(undefined);
@@ -133,7 +128,7 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
 
   /* ---- Barbeiro vindo de `?barbeiro=` ----------------------------------- */
   // Vem dos cards e do perfil. Fica pré-escolhido, mas o passo 3 aparece na
-  // mesma: quem chegou pelo perfil de um barbeiro pode na mesma mudar de ideias.
+  // mesma: quem chegou pelo perfil de um barbeiro pode mudar de ideias.
   const preselected = searchParams.get('barbeiro');
   const [appliedPreselection, setAppliedPreselection] = useState(false);
   if (!appliedPreselection && preselected) {
@@ -148,12 +143,12 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
      ----------------------------------------------------------------------- */
 
   // Mudar de serviço muda a duração, e com ela a grelha de horas. Se o serviço
-  // novo não leva barba, o estilo de barba deixa de fazer sentido.
+  // novo não leva barba, a preferência de barba deixa de fazer sentido.
   const [lastServiceType, setLastServiceType] = useState(serviceType);
   if (lastServiceType !== serviceType) {
     setLastServiceType(serviceType);
     setTime('');
-    if (!needsBeardStyle) setBeardStyleId(null);
+    if (!includesBeard) setBeard(false);
     // Um barbeiro que não preste o serviço novo deixa de poder ficar escolhido.
     if (barberId && !eligibleBarbers.some((b) => b.id === barberId)) setBarberId(null);
   }
@@ -217,36 +212,28 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
   );
 
   /* ---- Validação por passo ---------------------------------------------- */
-  /**
-   * A razão por que não se pode avançar, ou `null` se se pode.
-   *
-   * Calculada a cada render, sem memorização: são meia dúzia de comparações de
-   * strings e o React Compiler trata disto melhor do que um `useMemo` escrito à
-   * mão sobre valores derivados.
-   */
+  /** A razão por que não se pode avançar, ou `null` se se pode. */
   const blocker = ((): string | null => {
     switch (step) {
       case 0:
-        return serviceType ? null : 'Escolhe o serviço que queres.';
+        return serviceType ? null : 'Escolha o serviço que procura.';
       case 1:
-        if (!styleId) return 'Escolhe o estilo de corte.';
-        if (needsBeardStyle && !beardStyleId) return 'Escolhe também o estilo de barba.';
-        return null;
+        return styleBlocker(styleId, otherStyle);
       case 2:
-        return barberId ? null : 'Escolhe o barbeiro que te vai atender.';
+        return barberId ? null : 'Escolha o barbeiro que o vai atender.';
       case 3:
-        if (!date) return 'Escolhe o dia.';
-        if (!time) return 'Escolhe a hora.';
+        if (!date) return 'Escolha o dia.';
+        if (!time) return 'Escolha a hora.';
         return null;
       case 4:
-        if (!locationType) return 'Escolhe onde queres ser atendido.';
+        if (!locationType) return 'Escolha onde quer ser atendido.';
         if (locationType === 'domicilio' && address.trim().length < 5) {
-          return 'Escreve a morada onde queres receber o barbeiro.';
+          return 'Escreva a morada onde quer receber o barbeiro.';
         }
         return null;
       case 5:
-        if (name.trim().length < 2) return 'Escreve o teu nome.';
-        if (!isValidPhone(phone)) return 'Escreve um telemóvel válido.';
+        if (name.trim().length < 2) return 'Escreva o seu nome.';
+        if (!isValidPhone(phone)) return 'Escreva um telemóvel válido.';
         return null;
       default:
         return null;
@@ -296,8 +283,8 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
         barberName: barber.name,
         serviceId: service.id,
         serviceName: service.name,
-        styleName: styleId ? getStyleById(styleId)?.name : undefined,
-        beardStyleName: beardStyleId ? getStyleById(beardStyleId)?.name : undefined,
+        styleName: styleLabel(styleId, otherStyle),
+        beardStyleName: includesBeard && beard ? beardDesign.name : undefined,
         price: total,
         durationMinutes: service.durationMinutes,
         date,
@@ -322,7 +309,7 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
         'error',
       );
       // A hora pode ter sido ocupada entretanto — volta a ler a grelha e manda
-      // o cliente de volta ao passo da hora, que é onde ele tem de decidir.
+      // o cliente de volta ao passo da hora, que é onde tem de decidir.
       if (barber && service && date) {
         const fresh = await getAvailableSlots(barber.id, service.id, date);
         setSlots(fresh);
@@ -332,62 +319,24 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
     } finally {
       setSubmitting(false);
     }
-  }, [barber, service, serviceType, locationType, blocker, styleId, beardStyleId, total, date, time, address, name, phone, notes, showToast, goTo]);
+  }, [barber, service, serviceType, locationType, blocker, styleId, otherStyle, includesBeard, beard, total, date, time, address, name, phone, notes, showToast, goTo]);
 
   /* ======================================================================== */
-  /* Ecrã final — superfície ESCURA, como no template                         */
+  /* Ecrã final                                                               */
   /* ======================================================================== */
   if (confirmed) {
     return (
-      <div ref={topRef} data-surface="dark" className="rounded-xl bg-ink px-4 py-12 sm:px-8 sm:py-16">
-        <div className="mx-auto max-w-md text-center">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full border-2 border-gold text-gold">
-            <Check className="size-8" />
-          </div>
-
-          <h2 className="mt-6 text-3xl text-white">Agendamento confirmado!</h2>
-          <p className="mt-3 text-text-muted">
-            Falta só avisar o barbeiro. Carrega no botão abaixo — a mensagem de
-            WhatsApp já vai escrita, com todos os detalhes.
-          </p>
-
-          <dl className="mt-7 space-y-3 rounded-lg border border-white/10 bg-white/5 p-5 text-left text-sm">
-            <IconRow icon={<MapPin className="size-4" />}>
-              {formatDateLong(confirmed.date)} · {confirmed.time}
-            </IconRow>
-            <IconRow icon={<HomePin className="size-4" />}>
-              {formatLocationType(confirmed.locationType)}
-              {confirmed.address ? ` — ${confirmed.address}` : ''}
-            </IconRow>
-            <IconRow icon={<Check className="size-4" />}>{confirmed.barberName}</IconRow>
-            <div className="border-t border-white/10 pt-3">
-              <IconRow icon={<HeadCut className="size-4" />}>
-                {describeService(confirmed)} · {formatKz(confirmed.price)}
-              </IconRow>
-            </div>
-          </dl>
-
-          <a
-            href={bookingWhatsappLink(confirmed)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 flex min-h-[54px] w-full items-center justify-center gap-2 rounded-md bg-gold px-6 text-base font-bold text-ink transition-transform hover:scale-[1.02]"
-          >
-            Confirmar pelo WhatsApp
-          </a>
-
-          <ButtonLink href="/conta" variant="outline" size="lg" className="mt-3 w-full">
-            Ver os meus agendamentos
-          </ButtonLink>
-
-          <p className="mt-5 text-xs text-text-muted">{paymentClaim()}.</p>
+      <div ref={topRef} className="scroll-mt-20">
+        <Stepper current={LAST_STEP} />
+        <div className="mt-10">
+          <BookingConfirmed booking={confirmed} barber={barber} />
         </div>
       </div>
     );
   }
 
   /* ======================================================================== */
-  /* Fluxo — superfície CLARA                                                 */
+  /* Fluxo                                                                    */
   /* ======================================================================== */
   return (
     <div ref={topRef} className="scroll-mt-20">
@@ -399,81 +348,47 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
         Passo {step + 1} de {STEPS.length}: {STEPS[step]}.
       </div>
 
-      <div className="mt-8">
+      <div className="mt-10">
         {step === 0 && (
           <StepPanel
-            title="Qual é o serviço?"
-            subtitle="Escolhe o serviço e continua para seleccionares o estilo, o barbeiro e a hora."
+            eyebrow="Serviço"
+            title="Qual é o serviço que procura?"
+            subtitle="Escolha o serviço que deseja e continue para seleccionar o estilo, o barbeiro e definir o melhor horário para si."
           >
-            <div className="grid gap-3 sm:grid-cols-2">
-              {BOOKABLE_SERVICES.map((option) => {
-                const Illustration = option.includesBeard ? HeadBeard : HeadCut;
-                return (
-                  <SelectableCard
-                    key={option.type}
-                    label={`${option.name}, desde ${formatKz(option.fromPrice)}`}
-                    selected={serviceType === option.type}
-                    onSelect={() => setServiceType(option.type)}
-                    className="flex flex-col items-center gap-3 py-7 text-center"
-                  >
-                    <Illustration className="size-14 text-primary-dim" />
-                    <span className="block font-bold text-text">{option.name}</span>
-                    <span className="tabular block text-sm text-text-muted">
-                      Desde {formatKz(option.fromPrice)}
-                    </span>
-                  </SelectableCard>
-                );
-              })}
-            </div>
-
-            {/* "O que está incluído?" só aparece depois de haver escolha: antes
-                disso não há nada de concreto para listar. */}
-            {bookable && (
-              <div className="mt-7">
-                <h3 className="text-base font-bold text-text">O que está incluído?</h3>
-                <ul className="mt-3 space-y-2">
-                  {bookable.included.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-text-muted">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary-dim" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <ServiceChooser value={serviceType} onChange={setServiceType} />
           </StepPanel>
         )}
 
         {step === 1 && (
           <StepPanel
-            title="Escolhe o estilo"
-            subtitle="Fica registado no agendamento, para o barbeiro já chegar a saber o que queres."
+            eyebrow="Estilo"
+            title="Escolha o seu estilo"
+            subtitle={
+              includesBeard
+                ? 'Seleccione o estilo de cabelo e personalize o acabamento da barba. As suas preferências serão partilhadas com o barbeiro antes do atendimento.'
+                : 'Seleccione o estilo de cabelo. A sua preferência será partilhada com o barbeiro antes do atendimento.'
+            }
           >
-            <StyleGrid
-              legend="Estilo de corte"
-              styles={haircutStyles}
-              selectedId={styleId}
-              onSelect={setStyleId}
+            <StyleChooser
+              includesBeard={includesBeard}
+              styleId={styleId}
+              onStyle={setStyleId}
+              otherText={otherStyle}
+              onOtherText={setOtherStyle}
+              beard={beard}
+              onBeard={setBeard}
+              showErrors={showErrors}
             />
-            {needsBeardStyle && (
-              <div className="mt-8">
-                <StyleGrid
-                  legend="Estilo de barba"
-                  styles={beardStyles}
-                  selectedId={beardStyleId}
-                  onSelect={setBeardStyleId}
-                />
-              </div>
-            )}
           </StepPanel>
         )}
 
         {step === 2 && (
           <StepPanel
-            title="Escolhe o teu barbeiro"
-            subtitle="Todos prestam o serviço que escolheste. O preço é o deste profissional."
+            eyebrow="Barbeiro"
+            title="Escolha o seu barbeiro"
+            subtitle="Todos prestam o serviço que escolheu. O preço é o de cada profissional."
           >
-            <ul className="space-y-3">
+            <ul className="grid gap-3 md:grid-cols-2">
               {eligibleBarbers.map((b) => {
                 const own = b.services.find((s) => s.type === serviceType);
                 return (
@@ -482,27 +397,28 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
                       label={`${b.name}, ${own ? formatKz(own.price) : ''}`}
                       selected={barberId === b.id}
                       onSelect={() => setBarberId(b.id)}
-                      className="flex items-center gap-4 pr-12"
+                      className="flex h-full items-center gap-4 p-3 pr-12"
                     >
                       <Image
                         src={b.photo}
                         alt=""
-                        width={64}
-                        height={64}
-                        className="size-16 shrink-0 rounded-md object-cover"
+                        width={112}
+                        height={112}
+                        className="aspect-square w-24 shrink-0 rounded-lg object-cover sm:w-28"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate font-bold text-text">{b.name}</span>
+                        <span className="block truncate text-lg font-bold text-text">{b.name}</span>
                         {b.rating !== null && (
                           <span className="mt-0.5 block">
                             <Rating value={b.rating} count={b.reviewCount} />
                           </span>
                         )}
-                        <span className="mt-0.5 block truncate text-sm text-text-muted">
-                          {b.specialties.slice(0, 2).join(', ')} · {b.yearsOfExperience} anos de experiência
+                        <span className="mt-1 flex items-center gap-1.5 text-sm text-text-muted">
+                          <MapPin className="size-4 shrink-0" />
+                          {b.area} · {b.yearsOfExperience} anos de experiência
                         </span>
                         {own && (
-                          <span className="tabular mt-1 block text-sm font-bold text-text">
+                          <span className="tabular mt-1.5 block font-bold text-accent">
                             {formatKz(own.price)}
                             <span className="font-normal text-text-muted">
                               {' '}· {formatDuration(own.durationMinutes)}
@@ -520,8 +436,9 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
 
         {step === 3 && (
           <StepPanel
-            title="Quando queres o serviço?"
-            subtitle={barber ? `Estes são os horários livres do ${firstName(barber.name)}.` : ''}
+            eyebrow="Agendamento"
+            title="Quando quer o serviço?"
+            subtitle={barber ? `Estes são os horários livres de ${barber.name}.` : undefined}
           >
             {!isClient ? (
               <p className="text-sm text-text-muted">A carregar o calendário…</p>
@@ -536,56 +453,31 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
                 />
 
                 <div>
-                  <h3 className="text-sm font-bold text-text">Horários disponíveis</h3>
+                  <h3 className="font-sans text-base font-bold tracking-normal">Horários disponíveis</h3>
                   <div className="mt-3" aria-live="polite">
                     {!date ? (
-                      <p className="rounded-md border border-dashed border-border p-4 text-sm text-text-muted">
-                        Escolhe primeiro o dia.
+                      <p className="rounded-xl border border-dashed border-border p-4 text-sm text-text-muted">
+                        Escolha primeiro o dia.
                       </p>
                     ) : loadingSlots ? (
                       <p className="text-sm text-text-muted">A procurar horários…</p>
                     ) : slots.length === 0 ? (
-                      <p className="rounded-md border border-dashed border-border p-4 text-sm text-text-muted">
-                        {barber?.name} não atende neste dia. Escolhe outro.
+                      <p className="rounded-xl border border-dashed border-border p-4 text-sm text-text-muted">
+                        {barber?.name} não atende neste dia. Escolha outro.
                       </p>
                     ) : slots.every((s) => !s.available) ? (
-                      <p className="rounded-md border border-dashed border-border p-4 text-sm text-text-muted">
-                        Já não há horas livres neste dia. Experimenta o dia seguinte.
+                      <p className="rounded-xl border border-dashed border-border p-4 text-sm text-text-muted">
+                        Já não há horas livres neste dia. Experimente o dia seguinte.
                       </p>
                     ) : (
-                      <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-3">
-                        {slots.map((slot) => (
-                          <li key={slot.time}>
-                            <button
-                              type="button"
-                              disabled={!slot.available}
-                              onClick={() => setTime(slot.time)}
-                              aria-pressed={time === slot.time}
-                              aria-label={
-                                slot.available
-                                  ? `${slot.time}, disponível`
-                                  : `${slot.time}, ${slot.reason === 'ocupado' ? 'ocupado' : 'indisponível'}`
-                              }
-                              className={`tabular min-h-[44px] w-full rounded-md border text-sm font-semibold transition-colors ${
-                                time === slot.time
-                                  ? 'border-gold bg-gold text-ink'
-                                  : slot.available
-                                    ? 'border-border bg-surface text-text hover:border-primary-dim'
-                                    : 'cursor-not-allowed border-border/50 bg-surface/40 text-text-muted/40 line-through'
-                              }`}
-                            >
-                              {slot.time}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
+                      <SlotGrid slots={slots} value={time} onChange={setTime} />
                     )}
                   </div>
 
                   {date && time && (
-                    <p className="mt-4 rounded-md bg-surface-2 p-3 text-sm text-text">
+                    <p className="mt-4 rounded-xl bg-selected p-3 text-sm text-text">
                       <span className="text-text-muted">Escolhido: </span>
-                      {formatDateLong(date)}, às {time}.
+                      {dateLabel(date)}, às {time}.
                     </p>
                   )}
                 </div>
@@ -608,18 +500,35 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
 
         {step === 5 && barber && service && (
           <StepPanel
-            title="Confirma o teu agendamento"
-            subtitle="Falta só saber quem és, para o barbeiro te poder contactar."
+            eyebrow="Confirmação"
+            title="Tudo pronto!"
+            subtitle="Revise os detalhes do seu agendamento. Em seguida, é só confirmar e preparar-se para uma experiência única."
           >
-            <div className="space-y-4">
+            <BookingReview
+              date={date}
+              time={time}
+              place={
+                locationType === 'domicilio'
+                  ? { title: 'Endereço', lines: [address.trim()] }
+                  : { title: 'No salão', lines: [barber.area] }
+              }
+              barber={barber}
+              serviceName={bookable?.name ?? service.name}
+              durationMinutes={service.durationMinutes}
+              servicePrice={service.price}
+              isFromPrice={false}
+              homeFee={locationType === 'domicilio'}
+              style={styleLabel(styleId, otherStyle)}
+              beard={includesBeard && beard}
+            >
               <Field
                 label="Nome"
                 id="nome"
                 value={name}
                 onChange={setName}
                 autoComplete="name"
-                placeholder="Como te chamas?"
-                error={showErrors && name.trim().length < 2 ? 'Escreve o teu nome.' : undefined}
+                placeholder="Como se chama?"
+                error={showErrors && name.trim().length < 2 ? 'Escreva o seu nome.' : undefined}
                 required
               />
               <Field
@@ -630,7 +539,6 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
                 onChange={setPhone}
                 autoComplete="tel"
                 placeholder="923 456 789"
-                hint="É por aqui que o barbeiro te contacta, e é como voltas a encontrar o agendamento."
                 error={
                   (showErrors || phone.length > 0) && !isValidPhone(phone)
                     ? 'Número inválido. Deve ter 9 algarismos e começar por 9.'
@@ -638,86 +546,19 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
                 }
                 required
               />
-            </div>
-
-            {/* ---- Resumo ---------------------------------------------- */}
-            <div className="mt-7 rounded-lg border border-border bg-surface p-5">
-              <h3 className="text-base font-bold text-text">Resumo do agendamento</h3>
-
-              <dl className="mt-4 space-y-2 text-sm">
-                <Row label="Serviço" value={service.name} />
-                {styleId && <Row label="Estilo de corte" value={getStyleById(styleId)?.name ?? ''} />}
-                {beardStyleId && (
-                  <Row label="Estilo de barba" value={getStyleById(beardStyleId)?.name ?? ''} />
-                )}
-                <Row label="Barbeiro" value={barber.name} />
-                <Row label="Duração" value={formatDuration(service.durationMinutes)} />
-                <Row label="Dia e hora" value={`${formatDateLong(date)}, ${time}`} />
-                <Row
-                  label="Onde"
-                  value={
-                    locationType === 'domicilio'
-                      ? `${formatLocationType('domicilio')} — ${address.trim()}`
-                      : `${formatLocationType('salao')} — ${barber.area}`
-                  }
-                />
-              </dl>
-
-              <h3 className="mt-6 text-base font-bold text-text">Resumo de pagamento</h3>
-              <dl className="mt-3 space-y-2 text-sm">
-                <Row label={service.name} value={formatKz(service.price)} />
-                {locationType === 'domicilio' && (
-                  <Row label="Deslocação" value={formatKz(PRICING.homeServiceFee)} />
-                )}
-                <div className="!mt-3 border-t border-border pt-3">
-                  <Row label="Total" value={formatKz(total)} emphasis />
-                </div>
-              </dl>
-
-              {/* O que se diz sobre o pagamento segue `PAYMENT`, para a
-                  interface não prometer uma regra que já mudou. */}
-              <p className="mt-4 text-sm text-text-muted">
-                {paymentClaim()}. Métodos aceites: {PAYMENT.methods.join(', ')}.
-              </p>
-            </div>
+            </BookingReview>
           </StepPanel>
         )}
       </div>
 
-      {/* ---- Barra de navegação --------------------------------------- */}
-      <div className="mt-8">
-        {showErrors && blocker && (
-          <p role="alert" className="mb-3 text-sm font-medium text-cancelled">
-            {blocker}
-          </p>
-        )}
-
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
-          {step > 0 && (
-            <Button type="button" variant="secondary" size="lg" onClick={goBack} className="sm:w-auto">
-              ← Voltar
-            </Button>
-          )}
-
-          {step < LAST_STEP ? (
-            <Button
-              type="button"
-              size="lg"
-              onClick={goNext}
-              // Nunca desactivado: um botão apagado não diz o que falta. Carregar
-              // revela a razão, por cima do botão e em `role="alert"`.
-              aria-describedby={showErrors && blocker ? undefined : undefined}
-              className="flex-1"
-            >
-              Continuar <ArrowRight />
-            </Button>
-          ) : (
-            <Button type="button" size="lg" onClick={handleSubmit} disabled={submitting} className="flex-1">
-              {submitting ? 'A agendar…' : 'Confirmar agendamento'}
-            </Button>
-          )}
-        </div>
-      </div>
+      <FlowNav
+        canGoBack={step > 0}
+        onBack={goBack}
+        onNext={step < LAST_STEP ? goNext : handleSubmit}
+        nextLabel={step < LAST_STEP ? 'Continuar' : submitting ? 'A agendar…' : 'Confirmar agendamento'}
+        busy={submitting}
+        error={showErrors ? blocker : null}
+      />
     </div>
   );
 }
@@ -729,7 +570,7 @@ export function BookingFlow({ barbers }: { barbers: Barber[] }) {
 /**
  * Onde o serviço acontece.
  *
- * O template mostra aqui um mapa. Não há mapa: um mapa a sério precisa de chave
+ * O template original mostrava aqui um mapa. Não há mapa: um mapa a sério precisa de chave
  * de API e de custo mensal, e a zona piloto ainda nem está fechada. Em vez
  * disso há a morada escrita, com dois atalhos — "Casa" e "Trabalho" — guardados
  * neste dispositivo, que resolvem o mesmo problema: não ter de escrever a
@@ -777,11 +618,12 @@ function LocationStep({
 
   return (
     <StepPanel
-      title="Onde queres o serviço?"
-      subtitle="No salão do barbeiro, ou em tua casa — se ele fizer domicílio."
+      eyebrow="Localização"
+      title="Onde quer ser atendido?"
+      subtitle="No local da sua preferência, ou no salão do barbeiro — se ele atender no salão."
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        {(['salao', 'domicilio'] as const).map((type) => {
+        {(['domicilio', 'salao'] as const).map((type) => {
           const offered = barber.locationTypes.includes(type);
           const Illustration = type === 'salao' ? MapPin : HomePin;
 
@@ -789,12 +631,12 @@ function LocationStep({
             return (
               <div
                 key={type}
-                className="rounded-lg border-2 border-dashed border-border p-4 text-left opacity-60"
+                className="rounded-xl border-2 border-dashed border-border p-4 text-left opacity-60"
               >
                 <Illustration className="size-6 text-text-muted" />
                 <p className="mt-2 font-bold text-text">{formatLocationType(type)}</p>
                 <p className="mt-1 text-sm text-text-muted">
-                  {firstName(barber.name)} não faz {type === 'salao' ? 'atendimento no salão' : 'domicílio'}.
+                  {barber.name} não faz {type === 'salao' ? 'atendimento no salão' : 'domicílio'}.
                 </p>
               </div>
             );
@@ -808,7 +650,7 @@ function LocationStep({
               onSelect={() => onLocationType(type)}
               className="pr-12"
             >
-              <Illustration className="size-6 text-primary-dim" />
+              <Illustration className="size-7 text-gold" />
               <span className="mt-2 block font-bold text-text">{formatLocationType(type)}</span>
               <span className="mt-1 block text-sm text-text-muted">
                 {type === 'salao'
@@ -835,8 +677,8 @@ function LocationStep({
                   type="button"
                   onClick={() => stored && onAddress(stored)}
                   disabled={!stored}
-                  className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-border bg-surface px-4 text-sm font-medium text-text transition-colors hover:border-primary-dim disabled:cursor-not-allowed disabled:text-text-muted disabled:hover:border-border"
-                  title={stored ?? 'Ainda não guardaste esta morada'}
+                  className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-border bg-surface px-4 text-sm font-medium text-text transition-colors hover:border-gold disabled:cursor-not-allowed disabled:text-text-muted disabled:hover:border-border"
+                  title={stored ?? 'Ainda não guardou esta morada'}
                 >
                   <MapPin className="size-4" />
                   {slot.label}
@@ -867,7 +709,7 @@ function LocationStep({
                   key={slot.id}
                   type="button"
                   onClick={() => store(slot.id, slot.label)}
-                  className="rounded-full border border-border px-3 py-1 font-medium text-text transition-colors hover:border-primary-dim"
+                  className="rounded-full border border-border px-3 py-1 font-medium text-text transition-colors hover:border-gold"
                 >
                   {slot.label}
                   {saved[slot.id] === address.trim() && ' ✓'}
@@ -884,195 +726,10 @@ function LocationStep({
           id="observacoes"
           value={notes}
           onChange={onNotes}
-          placeholder="Alguma coisa que o barbeiro deva saber?"
+          placeholder="Alguma coisa que o barbeiro deva saber? (ex.: ponto de referência)"
           optional
         />
       </div>
     </StepPanel>
   );
-}
-
-/* ========================================================================== */
-/* Peças internas                                                             */
-/* ========================================================================== */
-
-/** O cabeçalho comum a todos os passos: título, subtítulo e o conteúdo. */
-function StepPanel({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <h2 className="text-2xl sm:text-3xl">{title}</h2>
-      {subtitle && <p className="mt-2 max-w-lg text-text-muted">{subtitle}</p>}
-      <div className="mt-6">{children}</div>
-    </section>
-  );
-}
-
-/** A grelha de estilos, com a fotografia e o visto de selecção. */
-function StyleGrid({
-  legend,
-  styles,
-  selectedId,
-  onSelect,
-}: {
-  legend: string;
-  styles: Style[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-}) {
-  return (
-    <fieldset>
-      <legend className="text-sm font-bold text-text">{legend}</legend>
-      <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {styles.map((style) => {
-          const selected = selectedId === style.id;
-          return (
-            <li key={style.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(style.id)}
-                aria-pressed={selected}
-                aria-label={`${style.name}: ${style.description}`}
-                className={`group block w-full overflow-hidden rounded-lg border-2 text-left transition-colors ${
-                  selected ? 'border-selected-border bg-selected' : 'border-border bg-surface hover:border-primary-dim'
-                }`}
-              >
-                <span className="relative block aspect-[4/5] w-full">
-                  <Image
-                    src={style.photo}
-                    alt=""
-                    fill
-                    sizes="(max-width: 640px) 50vw, 220px"
-                    className="object-cover"
-                  />
-                  <SelectionMark selected={selected} className="absolute right-2 top-2" />
-                </span>
-                <span className="block p-3">
-                  <span className="block text-sm font-bold text-text">{style.name}</span>
-                  <span className="block text-xs text-text-muted">{style.description}</span>
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </fieldset>
-  );
-}
-
-function Row({
-  label,
-  value,
-  emphasis = false,
-}: {
-  label: string;
-  value: string;
-  emphasis?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <dt className="shrink-0 text-text-muted">{label}</dt>
-      <dd
-        className={`tabular text-right ${
-          emphasis ? 'text-base font-bold text-text' : 'font-medium text-text'
-        }`}
-      >
-        {value}
-      </dd>
-    </div>
-  );
-}
-
-/** Linha do cartão do ecrã final: um ícone dourado e o texto. */
-function IconRow({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3 text-white">
-      <span className="mt-0.5 shrink-0 text-gold" aria-hidden="true">
-        {icon}
-      </span>
-      <span className="min-w-0">{children}</span>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  id,
-  value,
-  onChange,
-  type = 'text',
-  placeholder,
-  hint,
-  error,
-  required = false,
-  optional = false,
-  autoComplete,
-}: {
-  label: string;
-  id: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  placeholder?: string;
-  hint?: string;
-  error?: string;
-  required?: boolean;
-  optional?: boolean;
-  autoComplete?: string;
-}) {
-  const hintId = hint ? `${id}-ajuda` : undefined;
-  const errorId = error ? `${id}-erro` : undefined;
-
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-bold text-text">
-        {label}
-        {optional && <span className="ml-1 font-normal text-text-muted">(opcional)</span>}
-      </label>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        required={required}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        aria-describedby={[hintId, errorId].filter(Boolean).join(' ') || undefined}
-        aria-invalid={error ? true : undefined}
-        className={`mt-1.5 min-h-[48px] w-full rounded-md border bg-surface px-3 text-base text-text placeholder:text-text-muted/60 ${
-          error ? 'border-cancelled' : 'border-border focus:border-primary-dim'
-        }`}
-      />
-      {hint && (
-        <p id={hintId} className="mt-1.5 text-xs text-text-muted">
-          {hint}
-        </p>
-      )}
-      {error && (
-        <p id={errorId} className="mt-1.5 text-xs text-cancelled">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* ---- Utilitários locais -------------------------------------------------- */
-
-/** "Edson Kiala" → "Edson". Para falar do barbeiro sem soletrar o nome todo. */
-function firstName(name: string): string {
-  return name.split(' ')[0];
-}
-
-/** "Corte degradê · Degradê clássico + Barba curta" — o serviço por extenso. */
-function describeService(booking: Booking): string {
-  const styles = [booking.styleName, booking.beardStyleName].filter(Boolean);
-  return styles.length > 0 ? `${booking.serviceName} · ${styles.join(' + ')}` : booking.serviceName;
 }

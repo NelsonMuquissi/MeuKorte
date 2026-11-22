@@ -17,7 +17,7 @@ export function whatsappLink(message: string): string {
 
 /** Mensagem genérica do botão flutuante e dos CTA de contacto. */
 export function generalWhatsappLink(): string {
-  return whatsappLink('Olá! Vim do site do Meu Korte e queria saber mais.');
+  return whatsappLink('Olá! Vim do site da Korte e queria saber mais.');
 }
 
 /**
@@ -28,7 +28,7 @@ export function generalWhatsappLink(): string {
  */
 export function bookingWhatsappLink(booking: Booking): string {
   const lines = [
-    'Olá! Fiz um agendamento no Meu Korte:',
+    'Olá! Fiz um agendamento na Korte:',
     '',
   ];
 

@@ -1,295 +1,327 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ButtonLink } from '@/components/ui/Button';
 import { BarberCard } from '@/components/barbers/BarberCard';
 import { Faq, type FaqItem } from '@/components/home/Faq';
 import {
-  Scissors, Crown, BarberCheck, CalendarClock, HomePin, ShieldCard,
-  Sparkle, Clock, Badge, Star, Check,
+  Scissors, BarberCheck, CalendarClock, CalendarIcon, ShieldCheck, Clock, Home,
+  Star, MapPin, Heart, ArrowRightIcon,
 } from '@/components/ui/Icons';
 import { getFeaturedBarbers } from '@/services/barbersService';
-import { formatKz } from '@/lib/format';
-import { generalWhatsappLink } from '@/lib/whatsapp';
 import {
-  SINGLE_CUT, SUBSCRIPTION_PLANS, PRICING, CANCELLATION,
-  PAYMENT, PILOT_AREA, SERVICE_FORMATS, CLAIMS, paymentClaim, barbersClaim,
+  CANCELLATION, PAYMENT, PILOT_AREA, SERVICE_FORMATS, CLAIMS,
 } from '@/config/business';
 
 export const metadata: Metadata = {
-  title: { absolute: 'Meu Korte — o teu barbeiro, onde estiveres' },
+  title: { absolute: 'Korte — o seu barbeiro, onde estiver' },
   description:
-    'Cortes, barba e estilo com qualidade profissional, no conforto da tua casa ou no salão. Escolhe o barbeiro, escolhe a hora, evita a fila. Em Luanda.',
+    'Cortes e barba com qualidade profissional, no conforto da sua casa ou no local da sua preferência. Escolha o barbeiro, escolha a hora, evite a fila. Em Luanda.',
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Meu Korte — o teu barbeiro, onde estiveres',
-    description: 'Cortes, barba e estilo com qualidade profissional, onde quiseres.',
+    title: 'Korte — o seu barbeiro, onde estiver',
+    description: 'Cortes e barba com qualidade profissional, onde estiver.',
     url: '/',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Meu Korte' }],
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Korte.' }],
   },
 };
 
 /**
- * Página inicial — secção 1 do template 2 (docs/template/image3.jpeg).
+ * Página inicial — referências de Novembro de 2026 em `Novas_Referencias/`:
+ * `Barber Landing Page Hero Design`, `Serviços de Barbearia MeuKorte`,
+ * `Como Funciona_ Agendamento de Barbeiro` e `Meet Talatona's Best Barbers`.
  *
- * Superfície escura de cima a baixo. Server Component; só o acordeão do FAQ
- * é cliente.
+ * Superfície clara de cima a baixo. Server Component; só o acordeão do FAQ é
+ * cliente. Os planos de assinatura e o banner "Mais do que um corte" saíram a
+ * pedido do cliente.
+ *
+ * As duas jornadas separam-se na secção "Os nossos serviços", logo a seguir ao
+ * herói: um card leva ao barbeiro em casa (`/agendar`), o outro ao salão
+ * (`/salao`).
  */
 export default async function HomePage() {
   const barbers = await getFeaturedBarbers(4);
 
-  /** As respostas saem das regras de `business.ts`, para não ficarem a mentir. */
+  /**
+   * Texto do cliente (`FAQS.txt`). Os números saem das regras de `business.ts`,
+   * para não ficarem a mentir se as regras mudarem.
+   */
   const faqItems: FaqItem[] = [
     {
-      question: 'Posso cancelar um agendamento?',
-      answer:
-        `Podes, até ${CANCELLATION.minHoursBefore} horas antes da hora agendada, ` +
-        'na tua conta. Depois disso o barbeiro já reservou o tempo para ti, por ' +
-        'isso pedimos que fales connosco pelo WhatsApp. Há uma tolerância de ' +
-        `${CANCELLATION.lateToleranceMinutes} minutos de atraso.`,
+      question: 'Cancelamentos e atrasos',
+      answer: [
+        `O cancelamento ou a alteração do agendamento pode ser solicitado até ${CANCELLATION.minHoursBefore} horas antes do horário marcado.`,
+        'Após esse período, o barbeiro já reservou esse tempo exclusivamente para o seu atendimento. Por isso, qualquer situação deverá ser comunicada directamente à nossa equipa através do WhatsApp.',
+        `Tolerância de atraso: concedemos uma tolerância máxima de ${CANCELLATION.lateToleranceMinutes} minutos. Após esse período, entre em contacto connosco para verificar a possibilidade de manter o atendimento.`,
+      ],
     },
     {
-      question: 'O barbeiro vai a minha casa?',
+      question: 'O barbeiro pode deslocar-se até minha casa?',
       answer: SERVICE_FORMATS.home
-        ? `Vai, nas zonas onde estamos a trabalhar: ${PILOT_AREA.homeServiceAreas.join(', ')}. ` +
-          `A deslocação tem uma taxa de ${formatKz(PRICING.homeServiceFee)}, que aparece ` +
-          'somada no total antes de confirmares. Nem todos os barbeiros fazem ' +
-          'domicílio — vês isso no perfil de cada um.'
-        : 'De momento o atendimento é só no salão.',
+        ? [
+            'Sim. A Korte disponibiliza atendimento ao domicílio nas zonas abrangidas pelo serviço. ' +
+              'A deslocação tem uma taxa adicional, cujo valor é apresentado no total antes da confirmação da marcação.',
+          ]
+        : ['De momento o atendimento é só no salão.'],
     },
     {
-      question: 'Quando é que pago?',
+      question: 'Quando devo efectuar o pagamento?',
       answer:
         PAYMENT.moment === 'on_service'
-          ? 'Pagas no fim do serviço, directamente ao barbeiro. Não pedimos nada ' +
-            `adiantado para agendar. Métodos aceites: ${PAYMENT.methods.join(', ')}.`
-          : 'O pagamento é feito no momento do agendamento. ' +
-            `Métodos aceites: ${PAYMENT.methods.join(', ')}.`,
+          ? [
+              'O pagamento é efectuado no final do serviço, directamente ao barbeiro. ' +
+                'Não é necessário efectuar qualquer pagamento antecipado para confirmar o agendamento.',
+              'Métodos de pagamento aceites:',
+            ]
+          : ['O pagamento é efectuado no momento do agendamento.', 'Métodos de pagamento aceites:'],
+      list: PAYMENT.methods,
     },
     {
       question: 'Quanto custa um corte?',
-      answer:
-        `Um corte está em ${formatKz(PRICING.standardCut)} e corte com barba em ` +
-        `${formatKz(PRICING.cutAndBeard)}. Cada barbeiro tem a sua tabela, que vês no ` +
-        'perfil antes de agendares. Se cortas todas as semanas, a assinatura sai mais em conta.',
+      answer: [
+        'Os preços podem variar consoante o barbeiro e os serviços disponíveis. ' +
+          'Consulte a tabela de preços no perfil de cada profissional antes de efectuar o agendamento.',
+      ],
     },
     {
-      question: 'Como recebo a confirmação?',
-      answer:
-        'Depois de agendares, és levado para o WhatsApp com a mensagem já escrita. ' +
-        'Envias, e o barbeiro confirma ou propõe outra hora. O agendamento fica ' +
-        'guardado na tua conta.',
+      question: 'Como recebo a confirmação da marcação?',
+      answer: [
+        'Após efectuar o agendamento, será redireccionado para o WhatsApp, com uma mensagem previamente preparada. ' +
+          'Basta enviar a mensagem para que a nossa equipa possa confirmar a disponibilidade ou propor um horário alternativo.',
+        'O agendamento ficará também registado na sua conta Korte.',
+      ],
     },
   ];
 
   return (
     <>
-      {/* ---- 1. HERO ---------------------------------------------------- */}
-      <section className="relative overflow-hidden bg-ink">
-        {/* Fotografia: ocupa a direita no desktop e todo o fundo no telemóvel. */}
-        <div className="absolute inset-0 lg:left-[38%]">
+      {/* ---- 1. HERÓI --------------------------------------------------- */}
+      {/*
+        Como em `Barber Landing Page Hero Design.png`: a fotografia ocupa a
+        metade direita até à borda do ecrã, sem moldura. O fundo claro da foto
+        é o creme da página (246,245,243 contra 247,245,242), por isso o lado
+        esquerdo funde-se sem costura; a mancha dourada faz parte da foto,
+        atrás do ombro. Um véu estreito à esquerda esconde a pouca diferença
+        que resta.
+      */}
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[52%] lg:block">
           <Image
-            src="/images/hero.jpg"
+            src="/images/hero-principal.jpg"
             alt=""
             fill
             priority
-            sizes="(max-width: 1024px) 100vw, 62vw"
-            className="object-cover object-center"
+            sizes="52vw"
+            className="object-cover object-left-top"
           />
-          {/*
-            Dois véus, porque o texto está por cima da fotografia em dois sítios
-            diferentes e com exigências diferentes.
-
-            1. HORIZONTAL — protege o título e o parágrafo, que estão à esquerda.
-               No telemóvel não há "à esquerda": o texto ocupa a largura toda e
-               passa por cima do rosto, que é a parte clara da foto. Por isso o
-               véu do telemóvel é muito mais fechado do que o do desktop, onde o
-               texto fica na metade esquerda e a foto pode respirar à direita.
-
-            2. VERTICAL — protege a barra de confiança, encostada ao fundo e a
-               toda a largura. No desktop o véu horizontal já se desfez nessa
-               zona, e sem este segundo véu o último item ficava por cima da
-               parte iluminada da foto.
-
-            Os valores não são de gosto: são o que faz o pior pixel por baixo de
-            cada texto passar o contraste mínimo. Trocar a fotografia por uma
-            mais clara obriga a medir outra vez — foi o que aconteceu quando a
-            foto provisória, escura, deu lugar a esta.
-          */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-r from-ink via-ink/92 to-ink/80 lg:from-ink lg:via-ink/70 lg:to-transparent"
-          />
-          <div
-            aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink via-ink/80 to-transparent"
-          />
+          <div aria-hidden="true" className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-bg to-transparent" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 sm:px-6 sm:pt-24">
-          <div className="max-w-xl">
-            <h1 className="text-[2.75rem] leading-[1.05] sm:text-6xl">
-              O teu barbeiro,
+        <div className="relative mx-auto max-w-6xl px-4 pt-10 sm:px-6 lg:flex lg:min-h-[680px] lg:items-center lg:py-16">
+          <div className="lg:max-w-[600px]">
+            <h1 className="text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-7xl">
+              O seu barbeiro,
               <br />
-              <span className="text-gold">onde estiveres.</span>
+              <span className="text-accent">onde estiver.</span>
             </h1>
 
-            <p className="mt-5 max-w-md text-lg text-text-muted">
-              Cortes, barba e estilo, com qualidade profissional, no conforto da
-              tua casa, no teu trabalho ou onde quiseres.
+            <p className="mt-6 max-w-md text-lg text-text-muted">
+              Cortes e barba com qualidade profissional, no conforto da sua casa
+              ou no local de preferência.
             </p>
 
-            {/* Duas entradas, porque há duas jornadas e começam em sítios
-                diferentes: no salão escolhe-se a casa, ao domicílio escolhe-se
-                o barbeiro. Fazer o cliente escolher aqui poupa-lhe um passo
-                errado lá dentro. Os planos descem para a sua própria secção. */}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/salao" variant="gold" size="lg">
-                Cortar no salão
-              </ButtonLink>
-              <ButtonLink href="/agendar" variant="outline" size="lg">
-                Barbeiro em minha casa
-              </ButtonLink>
+              <Link
+                href="/agendar"
+                className="inline-flex min-h-[56px] items-center justify-center gap-2.5 whitespace-nowrap rounded-xl bg-gold px-7 text-base font-bold text-ink shadow-gold transition-transform hover:scale-[1.02]"
+              >
+                <CalendarIcon className="size-5" />
+                Agendar agora
+                <ArrowRightIcon className="size-5" />
+              </Link>
+              <Link
+                href="/barbeiros"
+                className="inline-flex min-h-[56px] items-center justify-center gap-2.5 whitespace-nowrap rounded-xl border border-text/25 bg-surface px-7 text-base font-semibold text-text transition-colors hover:border-text/60"
+              >
+                <MapPin className="size-5" />
+                Ver barbeiros perto de mim
+              </Link>
             </div>
 
-            <p className="mt-4 text-sm text-text-muted">
-              <Link href="#planos" className="underline-offset-4 hover:underline">
-                Ou vê os planos de assinatura
-              </Link>
-            </p>
+            {/* ---- Barra de confiança ----------------------------------- */}
+            <ul className="mt-12 grid grid-cols-2 gap-y-6 sm:grid-cols-4 sm:divide-x sm:divide-border">
+              {[
+                { Icon: ShieldCheck, text: ['Profissionais', 'de confiança'] },
+                { Icon: Clock, text: ['Agendamento', 'rápido e fácil'] },
+                { Icon: Home, text: ['No local de', 'preferência'] },
+                { Icon: Star, text: ['Qualidade', 'garantida'] },
+              ].map(({ Icon, text }) => (
+                <li key={text[0]} className="sm:px-5 sm:first:pl-0">
+                  <Icon className="size-8 text-gold" />
+                  <p className="mt-2 text-sm text-text-muted">
+                    {text[0]}
+                    <br />
+                    {text[1]}
+                  </p>
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
 
-          {/* ---- 2. Barra de confiança ---------------------------------- */}
-          <ul className="mt-14 grid gap-5 border-t border-white/10 pt-8 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              // As quatro frases são promessas ao cliente e vivem em
-              // `business.ts`, ao lado das regras de que dependem. A do
-              // pagamento muda sozinha se `PAYMENT.moment` mudar; a dos
-              // barbeiros desaparece se não houver processo de verificação.
-              { Icon: BarberCheck, title: 'Barbeiros profissionais', text: barbersClaim() },
-              { Icon: CalendarClock, title: 'Agendamento online', text: CLAIMS.bookingText },
-              { Icon: HomePin, title: 'Serviço ao domicílio', text: CLAIMS.homeServiceText },
-              { Icon: ShieldCard, title: 'Pagamento seguro', text: paymentClaim() },
-            ].map(({ Icon, title, text }) => (
-              <li key={title} className="flex items-start gap-3">
-                <Icon className="mt-0.5 size-6 shrink-0 text-gold" />
-                <div>
-                  <p className="text-sm font-bold text-text">{title}</p>
-                  <p className="text-sm text-text-muted">{text}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+        {/* No telemóvel a fotografia vem por baixo do texto, a toda a largura. */}
+        <div className="relative mt-10 aspect-[856/743] lg:hidden">
+          <Image
+            src="/images/hero-principal.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
         </div>
       </section>
 
-      {/* ---- 3. OS NOSSOS SERVIÇOS -------------------------------------- */}
-      <section id="servicos" className="scroll-mt-20 border-t border-white/10 bg-bg">
+      {/* ---- 2. OS NOSSOS SERVIÇOS -------------------------------------- */}
+      <section id="servicos" className="scroll-mt-20 border-t border-border">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-            <div>
-              <h2 className="text-3xl sm:text-4xl">Os nossos serviços</h2>
-              <p className="mt-2 max-w-md text-text-muted">
-                Corta quando precisares, ou assina e tem o cabelo sempre em dia.
+          <div className="grid gap-6 lg:grid-cols-[1fr_1fr_0.95fr]">
+            <div className="lg:col-span-2">
+              <h2 className="text-4xl sm:text-5xl">
+                Os nossos <span className="text-accent">serviços</span>
+              </h2>
+              <p className="mt-3 max-w-lg text-lg text-text-muted">
+                Agende quando precisar: o barbeiro vai até si, ou vai ao salão
+                da sua confiança.
               </p>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="mt-8 grid gap-5 md:grid-cols-2">
                 <ServiceCard
-                  Icon={Crown}
-                  title="Assinatura"
-                  text="Mantém-te sempre em ordem. Cortes mensais, por um valor fixo e mais em conta."
-                  href="#planos"
-                  cta="Ver planos"
+                  photo="/images/servico-domicilio.jpg"
+                  Icon={Home}
+                  title="Corte no local de sua preferência"
+                  text="O seu barbeiro vai até si, com todo o equipamento necessário, para um corte com qualidade profissional."
+                  href="/agendar"
+                  features={[
+                    { Icon: ShieldCheck, label: 'Seguro e confiável' },
+                    { Icon: Clock, label: 'Horário flexível' },
+                    { Icon: MapPin, label: 'Onde estiver' },
+                  ]}
                 />
                 <ServiceCard
+                  photo="/images/servico-salao.jpg"
                   Icon={Scissors}
-                  title="Corte único"
-                  text={SINGLE_CUT.description}
+                  title="Corte no salão da sua confiança"
+                  text="Desfrute de um serviço personalizado, num ambiente profissional e confortável."
                   href="/salao"
-                  cta="Cortar no salão"
+                  features={[
+                    { Icon: BarberCheck, label: 'Profissionais certificados' },
+                    { Icon: Star, label: 'Ambiente confortável' },
+                    { Icon: MapPin, label: 'Vários salões' },
+                  ]}
                 />
               </div>
             </div>
 
-            {/* Painel fotográfico com as três palavras do template. */}
-            <div className="relative min-h-[260px] overflow-hidden rounded-lg lg:min-h-full">
-              <Image
-                src="/images/servicos-destaque.jpg"
-                alt=""
-                fill
-                sizes="(max-width: 1024px) 100vw, 380px"
-                className="object-cover"
-              />
-              <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
-              <ul className="absolute bottom-5 left-5 space-y-1">
-                {['Qualidade', 'Conveniência', 'Estilo'].map((w) => (
-                  <li key={w} className="text-xl font-extrabold text-white">{w}</li>
-                ))}
-              </ul>
-            </div>
+            <TrustPanel />
           </div>
         </div>
       </section>
 
-      {/* ---- 4. COMO FUNCIONA ------------------------------------------- */}
-      <section id="como-funciona" className="relative scroll-mt-20 overflow-hidden">
-        <Image
-          src="/images/como-funciona-fundo.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div aria-hidden="true" className="absolute inset-0 bg-ink/88" />
+      {/* ---- 3. COMO FUNCIONA ------------------------------------------- */}
+      {/*
+        Como em `Como Funciona_ Agendamento de Barbeiro.png`: quatro passos
+        numa linha, com setas entre eles, e à direita o telemóvel na mão a
+        mostrar a confirmação, a desvanecer para o fundo. A imagem é a da
+        referência, com o logótipo do ecrã trocado pelo "Korte.".
+      */}
+      <section id="como-funciona" className="relative scroll-mt-20 overflow-hidden border-t border-border">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 hidden w-[42%] lg:block"
+          style={{
+            maskImage: 'linear-gradient(to right, transparent 0%, black 38%), linear-gradient(to top, transparent 0%, black 18%)',
+            maskComposite: 'intersect',
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 38%), linear-gradient(to top, transparent 0%, black 18%)',
+            WebkitMaskComposite: 'source-in',
+          }}
+        >
+          <Image
+            src="/images/como-funciona.jpg"
+            alt=""
+            fill
+            sizes="42vw"
+            className="object-cover object-left"
+          />
+        </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <h2 className="text-3xl sm:text-4xl">Como funciona</h2>
-          <p className="mt-2 text-text-muted">
-            Escolhes o serviço, o estilo, o barbeiro e a hora.
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:min-h-[640px] lg:pr-[300px]">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl">
+            Como <span className="text-accent">funciona</span>
+          </h2>
+          <p className="mt-4 max-w-lg text-lg text-text-muted">
+            Em poucos passos, escolha o serviço, o barbeiro e o horário.
+            Rápido, simples e sem complicações.
           </p>
 
-          <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             {[
-              { Icon: Scissors, title: 'Escolhe o serviço', text: 'Corte, ou corte com barba.' },
-              { Icon: Sparkle, title: 'Selecciona o estilo', text: 'Degradê, clássico, afro e mais.' },
-              { Icon: BarberCheck, title: 'Marca o barbeiro', text: 'Vê avaliações e experiência.' },
-              { Icon: CalendarClock, title: 'Agenda o horário', text: 'Só aparecem as horas livres.' },
-            ].map(({ Icon, title, text }, i) => (
+              { Icon: Scissors, title: 'Escolha o serviço', text: 'Corte de cabelo, ou corte + barba.' },
+              { Icon: MapPin, title: 'Seleccione o estilo', text: 'Degradê, taper, escovilho, ou descreva o seu.' },
+              { Icon: BarberCheck, title: 'Marque o barbeiro', text: 'Confirme a disponibilidade e os detalhes do seu agendamento.' },
+              { Icon: CalendarClock, title: 'Agende o horário', text: 'Receba a confirmação e esteja pronto para o seu corte.' },
+            ].map(({ Icon, title, text }, i, all) => (
               <li key={title} className="relative">
-                <span className="flex size-14 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold">
-                  <Icon className="size-6" />
+                <span className="flex size-20 items-center justify-center rounded-full bg-icon-bg text-ink shadow-[0_6px_18px_rgb(199_145_74/0.22)] ring-1 ring-gold/25">
+                  <Icon className="size-8" />
                 </span>
-                <p className="mt-4 text-sm font-bold text-gold">
-                  Passo {i + 1}
-                </p>
+                {/* Seta para o passo seguinte, só quando estão em linha. */}
+                {i < all.length - 1 && (
+                  <ArrowRightIcon
+                    className="absolute right-1 top-7 hidden size-6 text-gold lg:block"
+                  />
+                )}
+                <p className="mt-5 font-bold text-accent">Passo {i + 1}</p>
                 <h3 className="mt-1 text-xl">{title}</h3>
-                <p className="mt-1.5 text-sm text-text-muted">{text}</p>
+                <p className="mt-2 text-text-muted">{text}</p>
               </li>
             ))}
           </ol>
+        </div>
 
-          <ButtonLink href="/agendar" variant="gold" size="lg" className="mt-10">
-            Começar agora
-          </ButtonLink>
+        {/* No telemóvel a imagem vem por baixo dos passos. */}
+        <div
+          className="relative mx-auto -mt-4 aspect-[642/742] max-w-sm lg:hidden"
+          style={{
+            maskImage: 'linear-gradient(to top, transparent 0%, black 20%)',
+            WebkitMaskImage: 'linear-gradient(to top, transparent 0%, black 20%)',
+          }}
+        >
+          <Image src="/images/como-funciona.jpg" alt="" fill sizes="384px" className="object-cover" />
         </div>
       </section>
 
-      {/* ---- 5. BARBEIROS ------------------------------------------------ */}
-      <section className="border-t border-white/10 bg-bg">
+      {/* ---- 4. OS NOSSOS BARBEIROS ------------------------------------- */}
+      <section className="border-t border-border">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl sm:text-4xl">Os nossos barbeiros</h2>
-              <p className="mt-2 text-text-muted">
+              <h2 className="text-4xl sm:text-5xl">
+                Os nossos <span className="text-accent">barbeiros</span>
+              </h2>
+              <p className="mt-3 text-lg text-text-muted">
                 Profissionais escolhidos a dedo para o arranque em {PILOT_AREA.district}.
               </p>
             </div>
-            <ButtonLink href="/barbeiros" variant="secondary" size="sm">
+            <Link
+              href="/barbeiros"
+              className="inline-flex min-h-[48px] items-center gap-2 rounded-xl border border-gold px-5 font-bold text-accent transition-colors hover:bg-selected"
+            >
               Ver todos
-            </ButtonLink>
+              <ArrowRightIcon className="size-5" />
+            </Link>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {barbers.map((barber) => (
               <BarberCard key={barber.id} barber={barber} />
             ))}
@@ -297,129 +329,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---- 6. PLANOS DE ASSINATURA ------------------------------------ */}
-      <section id="planos" className="scroll-mt-20 border-t border-white/10 bg-surface">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <p className="text-sm font-bold uppercase tracking-widest text-gold">
-            Planos de assinatura
-          </p>
-          <h2 className="mt-3 max-w-lg text-3xl sm:text-4xl">
-            Cabelo sempre em dia. Com mais vantagens.
-          </h2>
-          <p className="mt-3 max-w-md text-text-muted">
-            Escolhe o plano que combina contigo. Cancelas quando quiseres.
-          </p>
-
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {SUBSCRIPTION_PLANS.map((plan) => (
-              <div
-                key={plan.id}
-                className={`relative flex flex-col rounded-lg border p-6 ${
-                  plan.highlighted
-                    ? 'border-gold bg-gold/[0.07] shadow-gold lg:-mt-3 lg:pb-9'
-                    : 'border-border bg-bg'
-                }`}
-              >
-                {plan.highlighted && (
-                  <span className="absolute -top-3 right-6 rounded-full bg-gold px-3 py-1 text-xs font-extrabold text-ink">
-                    Mais popular
-                  </span>
-                )}
-
-                <h3 className="text-2xl">{plan.name}</h3>
-                <p className="mt-1 text-sm text-text-muted">{plan.cutsLabel}</p>
-
-                <p className="mt-5 flex items-baseline gap-1.5">
-                  <span className="tabular text-4xl font-extrabold text-gold">
-                    {formatKz(plan.price)}
-                  </span>
-                  <span className="text-sm text-text-muted">/{plan.period}</span>
-                </p>
-
-                <ul className="mt-6 flex-1 space-y-3">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2.5 text-sm text-text-muted">
-                      <Check className="mt-0.5 size-4 shrink-0 text-gold" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <ButtonLink
-                  href={generalWhatsappLink()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant={plan.highlighted ? 'gold' : 'secondary'}
-                  className="mt-7"
-                >
-                  Assinar
-                </ButtonLink>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-6 text-xs text-text-muted">
-            Preços de arranque, sujeitos a confirmação durante o período de teste.
-          </p>
-        </div>
-      </section>
-
-      {/* ---- 7. FAQ ------------------------------------------------------ */}
-      <section className="border-t border-white/10 bg-bg">
+      {/* ---- 5. PERGUNTAS FREQUENTES ------------------------------------ */}
+      <section className="border-t border-border bg-surface">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
-          <h2 className="text-3xl sm:text-4xl">Perguntas frequentes</h2>
+          <h2 className="text-4xl sm:text-5xl">
+            Perguntas <span className="text-accent">frequentes</span>
+          </h2>
           <div className="mt-8">
             <Faq items={faqItems} />
-          </div>
-        </div>
-      </section>
-
-      {/* ---- 8. BANNER FINAL --------------------------------------------- */}
-      <section className="relative overflow-hidden">
-        <Image src="/images/confianca.jpg" alt="" fill sizes="100vw" className="object-cover" />
-        <div aria-hidden="true" className="absolute inset-0 bg-ink/85" />
-
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl">
-                Mais do que um corte.
-                <br />
-                <span className="text-gold">É confiança.</span>
-              </h2>
-              <p className="mt-4 max-w-md text-text-muted">
-                O mesmo barbeiro, o mesmo cuidado, sempre que precisares.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/agendar" variant="gold" size="lg">
-                  Agendar agora
-                </ButtonLink>
-                <a
-                  href={generalWhatsappLink()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-md border border-white/25 px-7 font-bold text-white transition-colors hover:border-white/60"
-                >
-                  Falar pelo WhatsApp
-                </a>
-              </div>
-            </div>
-
-            <ul className="grid grid-cols-2 gap-6 sm:grid-cols-4 lg:grid-cols-2">
-              {[
-                { Icon: Sparkle, label: 'Estilo' },
-                { Icon: Clock, label: 'Pontualidade' },
-                { Icon: Badge, label: 'Profissionalismo' },
-                { Icon: Star, label: 'Satisfação' },
-              ].map(({ Icon, label }) => (
-                <li key={label} className="flex flex-col items-center gap-2 text-center lg:flex-row lg:text-left">
-                  <span className="flex size-14 items-center justify-center rounded-full border border-gold/40 text-gold">
-                    <Icon className="size-6" />
-                  </span>
-                  <span className="text-sm font-bold text-text">{label}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </section>
@@ -427,34 +344,109 @@ export default async function HomePage() {
   );
 }
 
-/** Card da secção "Os nossos serviços". */
+type IconComponent = (p: { className?: string }) => React.ReactElement;
+
+/** Card da secção "Os nossos serviços": fotografia, ícone, texto e CTA. */
 function ServiceCard({
+  photo,
   Icon,
   title,
   text,
   href,
-  cta,
+  features,
 }: {
-  Icon: (p: { className?: string }) => React.ReactElement;
+  photo: string;
+  Icon: IconComponent;
   title: string;
   text: string;
   href: string;
-  cta: string;
+  features: { Icon: IconComponent; label: string }[];
 }) {
   return (
-    <div className="group relative flex flex-col rounded-lg border border-border bg-surface p-6 transition-colors hover:border-gold/50">
-      <span className="flex size-12 items-center justify-center rounded-full bg-gold/10 text-gold">
-        <Icon className="size-6" />
-      </span>
-      <h3 className="mt-4 text-xl">{title}</h3>
-      <p className="mt-2 flex-1 text-sm text-text-muted">{text}</p>
-      <Link
-        href={href}
-        className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-gold after:absolute after:inset-0 after:content-['']"
-      >
-        {cta}
-        <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
-      </Link>
-    </div>
+    <article className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+      <div className="relative aspect-[16/7]">
+        <Image src={photo} alt="" fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" />
+        <span className="absolute left-4 top-4 flex size-14 items-center justify-center rounded-xl bg-gold text-ink">
+          <Icon className="size-7" />
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <h3 className="text-xl sm:text-2xl">{title}</h3>
+        <p className="mt-2 flex-1 text-text-muted">{text}</p>
+
+        <ul className="mt-5 grid grid-cols-3 divide-x divide-border border-y border-border py-3">
+          {features.map(({ Icon: FeatureIcon, label }) => (
+            <li key={label} className="flex flex-col items-center gap-1 px-1 text-center text-xs text-text-muted">
+              <FeatureIcon className="size-5 text-gold" />
+              {label}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-5">
+          <Link
+            href={href}
+            className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gold px-5 font-bold text-ink transition-transform hover:scale-[1.01]"
+          >
+            <CalendarIcon className="size-5" />
+            Agendar agora
+            <ArrowRightIcon className="size-4" />
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/** "Mais do que um corte, é confiança." — o painel à direita dos serviços. */
+function TrustPanel() {
+  const icons = [Star, ShieldCheck, Clock, Heart];
+
+  return (
+    <aside className="relative overflow-hidden rounded-xl border border-border bg-surface-2">
+      <Image
+        src="/images/servicos-destaque.jpg"
+        alt=""
+        fill
+        sizes="(max-width: 1024px) 100vw, 380px"
+        className="object-cover object-right opacity-70"
+      />
+      {/* Véu creme: o texto fica à esquerda, a fotografia respira à direita. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-r from-bg from-60% to-bg/50"
+      />
+
+      <div className="relative p-6 sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent">
+          Qualidade · Conveniência · Estilo
+        </p>
+        <h3 className="mt-4 text-2xl sm:text-3xl">
+          Mais do que um corte, é <span className="text-accent">confiança</span>.
+        </h3>
+        <p className="mt-3 max-w-xs text-text-muted">
+          Profissionais experientes, produtos de qualidade e um serviço pensado
+          para si.
+        </p>
+
+        <ul className="mt-7 space-y-5">
+          {CLAIMS.trustPanel.map((item, i) => {
+            const Icon = icons[i % icons.length];
+            return (
+              <li key={item.title} className="flex items-start gap-4">
+                <Icon className="size-7 shrink-0 text-gold" />
+                <div>
+                  <p className="text-sm font-bold text-text">{item.title}</p>
+                  <p className="text-sm text-text-muted">{item.text}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        <p className="mt-8 -rotate-3 font-serif text-2xl italic text-accent">Sempre consigo</p>
+      </div>
+    </aside>
   );
 }

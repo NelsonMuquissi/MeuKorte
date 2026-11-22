@@ -6,13 +6,13 @@ import { getBarbershops, getShopAreas } from '@/services/barbershopsService';
 export const metadata: Metadata = {
   title: 'Cortar no salão',
   description:
-    'Escolhe a barbearia mais perto de ti em Luanda, o corte e a hora. Sem fila de espera.',
+    'Escolha a barbearia mais perto de si em Luanda, o corte e a hora. Sem fila de espera.',
   alternates: { canonical: '/salao' },
   openGraph: {
-    title: 'Cortar no salão · Meu Korte',
-    description: 'Escolhe a barbearia mais perto de ti, o corte e a hora.',
+    title: 'Cortar no salão · Korte',
+    description: 'Escolha a barbearia mais perto de si, o corte e a hora.',
     url: '/salao',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Meu Korte' }],
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Korte.' }],
   },
 };
 
@@ -30,8 +30,8 @@ export default async function SalonPage() {
   ]);
 
   return (
-    <div data-surface="light" className="min-h-[70vh]">
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="min-h-[70vh]">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
         <h1 className="sr-only">Agendar um corte no salão</h1>
 
         <Suspense fallback={<div className="h-96" aria-hidden="true" />}>

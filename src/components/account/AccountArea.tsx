@@ -209,9 +209,9 @@ function Sections({
 
           {bookings.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border bg-surface p-10 text-center">
-              <p className="text-lg text-text">Ainda não tens agendamentos.</p>
+              <p className="text-lg text-text">Ainda não tem agendamentos.</p>
               <p className="mt-2 text-text-muted">
-                Se agendaste noutro telemóvel ou noutro navegador, os agendamentos
+                Se agendou noutro telemóvel ou noutro navegador, os agendamentos
                 ficaram lá.
               </p>
               <ButtonLink href="/agendar" className="mt-6">
@@ -313,7 +313,7 @@ function PhoneGate({
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-md">
       <label htmlFor="telemovel-consulta" className="block text-sm font-bold text-text">
-        O teu telemóvel
+        O seu telemóvel
       </label>
       <p id="telemovel-ajuda" className="mt-1 text-sm text-text-muted">
         O mesmo número que usaste para agendar.

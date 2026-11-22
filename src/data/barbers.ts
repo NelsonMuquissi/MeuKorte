@@ -60,6 +60,8 @@ export const barbers: Barber[] = [
     yearsOfExperience: 12,
     rating: 4.8,
     reviewCount: 34,
+    // Texto de demonstração, das referências do cliente.
+    featuredQuote: 'Muito profissional, respeita o tempo e deixa o resultado excelente.',
     services: [
       {
         id: '1-corte',
@@ -110,6 +112,8 @@ export const barbers: Barber[] = [
     yearsOfExperience: 7,
     rating: 4.9,
     reviewCount: 21,
+    // Texto de demonstração, das referências do cliente.
+    featuredQuote: 'Excelente atendimento, pontualidade e um corte impecável. Recomendo!',
     services: [
       {
         id: '2-corte',
@@ -117,7 +121,7 @@ export const barbers: Barber[] = [
         name: 'Corte em casa',
         durationMinutes: 45,
         price: PRICING.standardCut,
-        description: 'Corte completo na tua casa, com material próprio.',
+        description: 'Corte completo em sua casa, com material próprio.',
       },
       {
         id: '2-corte-barba',
@@ -151,6 +155,8 @@ export const barbers: Barber[] = [
     yearsOfExperience: 15,
     rating: 4.7,
     reviewCount: 48,
+    // Texto de demonstração, das referências do cliente.
+    featuredQuote: 'Corte com muito cuidado, ambiente agradável e atendimento de excelência.',
     services: [
       {
         id: '3-corte',
@@ -199,6 +205,8 @@ export const barbers: Barber[] = [
     yearsOfExperience: 4,
     rating: 4.6,
     reviewCount: 17,
+    // Texto de demonstração, das referências do cliente.
+    featuredQuote: 'Profissional, simpático e sempre no horário. O melhor barbeiro da zona.',
     services: [
       {
         id: '4-corte',
@@ -227,11 +235,6 @@ export const barbers: Barber[] = [
     ],
   },
 ];
-
-/** Todas as especialidades existentes, sem repetições, para os filtros. */
-export const allSpecialties: string[] = Array.from(
-  new Set(barbers.flatMap((b) => b.specialties)),
-).sort((a, b) => a.localeCompare(b, 'pt'));
 
 /** Todas as zonas onde há barbeiros, para os filtros. */
 export const allAreas: string[] = Array.from(

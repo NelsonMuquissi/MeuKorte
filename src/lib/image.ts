@@ -37,7 +37,7 @@ export async function compressImage(file: File): Promise<string> {
 
   // Limite de entrada, antes de carregar o ficheiro para memória.
   if (file.size > 15_000_000) {
-    throw new ImageError('A imagem é demasiado grande. Escolhe uma com menos de 15 MB.');
+    throw new ImageError('A imagem é demasiado grande. Escolha uma com menos de 15 MB.');
   }
 
   const bitmap = await loadBitmap(file);

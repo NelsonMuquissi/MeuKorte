@@ -34,35 +34,35 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Meu Korte — marca o teu corte em Luanda',
+    default: 'Korte — o seu barbeiro, onde estiver',
     // As páginas definem só o seu nome; o resto vem daqui.
-    template: '%s · Meu Korte',
+    template: '%s · Korte',
   },
   description:
-    'Marca o teu corte com o barbeiro que quiseres, à hora que te der jeito. No salão ou em tua casa, sem filas de espera.',
-  applicationName: 'Meu Korte',
+    'Agende o seu corte com o barbeiro que preferir, à hora que lhe convier. No salão ou no local da sua preferência, sem filas de espera.',
+  applicationName: 'Korte',
   keywords: ['barbearia', 'barbeiro', 'corte de cabelo', 'Luanda', 'Angola', 'agendamento'],
-  authors: [{ name: 'Meu Korte' }],
+  authors: [{ name: 'Korte' }],
   openGraph: {
     type: 'website',
     locale: 'pt_AO',
-    siteName: 'Meu Korte',
-    title: 'Meu Korte — marca o teu corte em Luanda',
+    siteName: 'Korte',
+    title: 'Korte — o seu barbeiro, onde estiver',
     description:
-      'Escolhe o barbeiro, escolhe a hora, evita a fila. No salão ou em tua casa.',
+      'Escolha o barbeiro, escolha a hora, evite a fila. No salão ou no local da sua preferência.',
     url: siteUrl,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Meu Korte — marca o teu corte em Luanda',
+    title: 'Korte — o seu barbeiro, onde estiver',
     description:
-      'Escolhe o barbeiro, escolhe a hora, evita a fila. No salão ou em tua casa.',
+      'Escolha o barbeiro, escolha a hora, evite a fila. No salão ou no local da sua preferência.',
   },
 };
 
 export const viewport: Viewport = {
-  // Acompanha o fundo da aplicação na barra do navegador no telemóvel.
-  themeColor: '#12171B',
+  // Acompanha o fundo do cabeçalho na barra do navegador no telemóvel.
+  themeColor: '#F7F5F2',
   width: 'device-width',
   initialScale: 1,
 };

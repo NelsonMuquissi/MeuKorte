@@ -1,5 +1,5 @@
 /**
- * Contrato de dados do Meu Korte.
+ * Contrato de dados da Korte.
  *
  * Estes tipos definem o formato da futura API Django + DRF. Quando o backend
  * existir, os serviços em `src/services/` passam a devolver estes mesmos tipos a
@@ -133,9 +133,11 @@ export interface Barber {
   reviewCount: number;
   /** Anos de experiência, mostrados no perfil. */
   yearsOfExperience: number;
+  /** Uma frase de um cliente, mostrada no card do barbeiro. */
+  featuredQuote?: string;
 }
 
-/** Umo agendamento. */
+/** Um agendamento. */
 export interface Booking {
   id: string;
   barberId: string;
@@ -147,9 +149,9 @@ export interface Booking {
   barbershopId?: string;
   /** Guardado para o histórico sobreviver a mudanças no catálogo. */
   barbershopName?: string;
-  /** Estilo de corte escolhido. */
+  /** Estilo de corte escolhido, ou a descrição do cliente em "Outro estilo". */
   styleName?: string;
-  /** Estilo de barba, quando o serviço a inclui. */
+  /** Preferência de barba ("Desenhar barba"), quando o serviço a inclui. */
   beardStyleName?: string;
   /** Preço cobrado, já com a taxa de deslocação se aplicável. */
   price: number;

@@ -53,7 +53,7 @@ export function AccountSummary({
           {name ? `Olá, ${firstName(name)}!` : 'Olá!'}
         </h2>
         <p className="mt-1.5 text-text-muted">
-          Bem-vindo de volta. Aqui tens o teu resumo.
+          Bem-vindo de volta. Aqui está o seu resumo.
         </p>
       </header>
 
@@ -66,8 +66,8 @@ export function AccountSummary({
           value={average !== null ? average.toFixed(1).replace('.', ',') : '—'}
           label={
             given.length === 0
-              ? 'Ainda não avaliaste'
-              : `Média das tuas ${given.length === 1 ? 'avaliação' : 'avaliações'}`
+              ? 'Ainda não avaliou'
+              : `Média das suas ${given.length === 1 ? 'avaliação' : 'avaliações'}`
           }
         />
       </ul>
@@ -78,7 +78,7 @@ export function AccountSummary({
 
         {!next ? (
           <div className="mt-4 rounded-lg border border-dashed border-border bg-surface p-8 text-center">
-            <p className="text-text">Não tens nada marcado.</p>
+            <p className="text-text">Não tem nada marcado.</p>
             <ButtonLink href="/agendar" className="mt-5">
               Agendar agora
             </ButtonLink>

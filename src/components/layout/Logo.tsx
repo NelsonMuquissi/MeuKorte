@@ -2,55 +2,48 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 /**
- * Logótipo do Meu Korte.
+ * Logótipo "Korte." — a palavra em tinta escura com o ponto dourado.
  *
- * A arte vem de `docs/template/image1.png`, com o fundo preto removido e em
- * duas variantes, porque o monograma é prateado e a palavra é branca:
+ * A arte vem de `Novas_Referencias/Korte. Minimalist Gold-Dot Wordmark.png`,
+ * recortada e em duas variantes:
  *
- *   - `logo-wordmark.png`      — arte clara, para superfícies escuras
- *   - `logo-wordmark-dark.png` — arte escura, para superfícies claras
+ *   - `korte.png`       — palavra escura, para superfícies claras (o normal)
+ *   - `korte-light.png` — palavra branca, para superfícies escuras
  *
- * A versão `wordmark` não traz a assinatura "O teu barbeiro, à tua maneira",
- * que a esta altura ficaria ilegível. A assinatura aparece no `full`, usado
- * onde o logótipo é grande (rodapé).
+ * O ponto é dourado nas duas.
  */
 
 interface LogoProps {
-  /** `light` = arte clara para fundo escuro (o caso normal). */
-  variant?: 'light' | 'dark';
-  /** `full` inclui a assinatura. */
-  size?: 'header' | 'full';
+  /** `dark` = palavra escura, para fundo claro. `light` = para fundo escuro. */
+  variant?: 'dark' | 'light';
+  /** `lg` para o rodapé. */
+  size?: 'header' | 'lg';
   className?: string;
   /** Com `false`, devolve só a imagem, sem a ligação à página inicial. */
   asLink?: boolean;
 }
 
 export function Logo({
-  variant = 'light',
+  variant = 'dark',
   size = 'header',
   className = '',
   asLink = true,
 }: LogoProps) {
-  const isFull = size === 'full';
-  const file = isFull
-    ? variant === 'dark' ? '/brand/logo-dark.png' : '/brand/logo.png'
-    : variant === 'dark' ? '/brand/logo-wordmark-dark.png' : '/brand/logo-wordmark.png';
-
   const image = (
     <Image
-      src={file}
-      alt="Meu Korte"
-      width={244}
-      height={isFull ? 134 : 115}
+      src={variant === 'light' ? '/brand/korte-light.png' : '/brand/korte.png'}
+      alt="Korte."
+      width={366}
+      height={96}
       priority
-      className={isFull ? 'h-16 w-auto sm:h-20' : 'h-8 w-auto sm:h-9'}
+      className={size === 'lg' ? 'h-10 w-auto' : 'h-7 w-auto sm:h-8'}
     />
   );
 
   if (!asLink) return <span className={className}>{image}</span>;
 
   return (
-    <Link href="/" className={`inline-flex items-center ${className}`} aria-label="Meu Korte, página inicial">
+    <Link href="/" className={`inline-flex items-center ${className}`} aria-label="Korte., página inicial">
       {image}
     </Link>
   );

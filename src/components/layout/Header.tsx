@@ -5,19 +5,17 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Logo } from './Logo';
 import { isFlowRoute } from './routes';
+import { CalendarIcon } from '@/components/ui/Icons';
 
 /**
- * Cabeçalho, como no template: barra escura com logótipo, navegação,
- * "Entrar" e o CTA dourado.
+ * Cabeçalho, como nas referências.
  *
- * O cabeçalho é SEMPRE escuro, mesmo por cima das páginas de superfície clara
- * — é assim nos nove ecrãs do template. Por isso força `data-surface` escuro
- * dentro de si, para que os tokens não sejam herdados de uma página clara.
- *
- * Tem duas formas:
- *   - completa (`full`): home e páginas públicas, com navegação e CTA;
- *   - estreita (`slim`): dentro do fluxo de agendamento, só logótipo e ícones,
- *     para não competir com o passo em curso.
+ * Tem duas formas, e cada uma tem a sua superfície:
+ *   - completa (`full`): páginas públicas. CLARA — logótipo escuro, navegação
+ *     com o item actual sublinhado a dourado, "Entrar" e o CTA dourado.
+ *   - estreita (`slim`): dentro dos fluxos de agendamento. ESCURA — só o
+ *     logótipo claro e o ícone da conta, para não competir com o passo em
+ *     curso. Força `data-surface="dark"` para não herdar os tokens da página.
  */
 
 const LINKS = [
@@ -59,9 +57,9 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
 
   if (shape === 'slim') {
     return (
-      <header data-surface="dark" className="sticky top-0 z-40 border-b border-white/10 bg-ink">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-          <Logo />
+      <header data-surface="dark" className="sticky top-0 z-40 bg-ink">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
+          <Logo variant="light" />
           <Link
             href="/conta"
             className="flex size-10 items-center justify-center rounded-md text-white/70 transition-colors hover:text-white"
@@ -78,8 +76,8 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
   }
 
   return (
-    <header data-surface="dark" className="sticky top-0 z-40 border-b border-white/10 bg-ink">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[72px] sm:px-6">
         <Logo />
 
         <nav className="hidden lg:block" aria-label="Principal">
@@ -89,8 +87,10 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
                 <Link
                   href={link.href}
                   aria-current={isActive(link.href) ? 'page' : undefined}
-                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive(link.href) ? 'text-gold' : 'text-white/70 hover:text-white'
+                  className={`relative block px-3 py-2 text-[15px] font-medium transition-colors ${
+                    isActive(link.href)
+                      ? 'text-accent after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gold'
+                      : 'text-text hover:text-accent'
                   }`}
                 >
                   {link.label}
@@ -103,14 +103,15 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
         <div className="hidden items-center gap-2 lg:flex">
           <Link
             href="/conta"
-            className="rounded-md px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white"
+            className="rounded-md px-3 py-2 text-[15px] font-medium text-text transition-colors hover:text-accent"
           >
             Entrar
           </Link>
           <Link
             href="/agendar"
-            className="inline-flex min-h-[42px] items-center rounded-md bg-gold px-5 text-sm font-bold text-ink transition-transform hover:scale-[1.03]"
+            className="inline-flex min-h-[46px] items-center gap-2 rounded-lg bg-gold px-5 text-[15px] font-bold text-ink shadow-gold transition-transform hover:scale-[1.03]"
           >
+            <CalendarIcon className="size-5" />
             Agendar agora
           </Link>
         </div>
@@ -121,7 +122,7 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
           aria-expanded={open}
           aria-controls="menu-mobile"
           aria-label={open ? 'Fechar menu' : 'Abrir menu'}
-          className="-mr-2 flex size-11 items-center justify-center rounded-md text-white lg:hidden"
+          className="-mr-2 flex size-11 items-center justify-center rounded-md text-text lg:hidden"
         >
           {open ? (
             <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
@@ -136,7 +137,7 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
       </div>
 
       {open && (
-        <div id="menu-mobile" className="border-t border-white/10 bg-ink lg:hidden">
+        <div id="menu-mobile" className="border-t border-border bg-surface lg:hidden">
           <nav aria-label="Principal" className="mx-auto max-w-6xl px-4 py-3">
             <ul className="flex flex-col gap-1">
               {LINKS.map((link) => (
@@ -145,7 +146,7 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
                     href={link.href}
                     aria-current={isActive(link.href) ? 'page' : undefined}
                     className={`flex min-h-[48px] items-center rounded-md px-3 text-base font-medium ${
-                      isActive(link.href) ? 'bg-white/5 text-gold' : 'text-white'
+                      isActive(link.href) ? 'bg-selected text-accent' : 'text-text'
                     }`}
                   >
                     {link.label}
@@ -153,15 +154,16 @@ export function Header({ variant }: { variant?: 'full' | 'slim' }) {
                 </li>
               ))}
               <li>
-                <Link href="/conta" className="flex min-h-[48px] items-center rounded-md px-3 text-base font-medium text-white">
+                <Link href="/conta" className="flex min-h-[48px] items-center rounded-md px-3 text-base font-medium text-text">
                   Entrar
                 </Link>
               </li>
               <li className="mt-2">
                 <Link
                   href="/agendar"
-                  className="flex min-h-[50px] items-center justify-center rounded-md bg-gold px-4 font-bold text-ink"
+                  className="flex min-h-[50px] items-center justify-center gap-2 rounded-lg bg-gold px-4 font-bold text-ink"
                 >
+                  <CalendarIcon className="size-5" />
                   Agendar agora
                 </Link>
               </li>

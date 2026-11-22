@@ -1,153 +1,97 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   MEU KORTE — DESIGN TOKENS
+   KORTE. — DESIGN TOKENS
    ----------------------------------------------------------------------------
-   As cores vêm do template em docs/template/image3.jpeg, amostradas do próprio
-   ficheiro. O template é a fonte de verdade (ver CLAUDE.md).
+   As cores vêm das referências em `Novas_Referencias/` (Novembro de 2026),
+   amostradas dos próprios ficheiros: fundo creme, tinta quase preta e o
+   dourado bronze do ponto do logótipo "Korte.".
 
    Três camadas:
      1. PRIMITIVAS   --mk-*      valores crus. Nunca usados nos componentes.
      2. SEMÂNTICAS   --ui-*      o que a cor significa. É o que os componentes usam.
      3. PONTE        @theme      expõe as semânticas como classes Tailwind.
 
-   DUAS SUPERFÍCIES. O produto tem dois registos:
-     - ESCURA  (por omissão): home, hero, como funciona, planos, banners,
-               confirmação, cabeçalho e barra lateral.
-     - CLARA   (`data-surface="light"`): todo o fluxo de agendamento e a área
-               do cliente.
+   DUAS SUPERFÍCIES.
+     - CLARA   (por omissão): o site inteiro — página inicial, barbeiros, os dois
+               fluxos de agendamento, área do cliente.
+     - ESCURA  (`data-surface="dark"`): só o cabeçalho dos fluxos, o rodapé e a
+               barra lateral da conta.
 
-   A superfície clara redefine APENAS a camada 2. Por isso um botão, um card ou
-   um badge funcionam nas duas superfícies sem saber em qual estão, e sem uma
-   única condicional no React.
-
-   As duas superfícies são DECLARADAS, nenhuma é só "o que sobra". O escuro vale
-   no `:root` por omissão e vale OUTRA VEZ em `[data-surface="dark"]`, porque as
-   variáveis CSS herdam: sem a segunda declaração, um bloco escuro dentro de uma
-   página clara continuaria a receber os tokens claros e acabava com texto quase
-   preto sobre fundo preto. É exactamente o caso do ecrã de confirmação, que é
-   escuro no meio do fluxo claro.
+   A escura redefine APENAS a camada 2. Por isso um botão, um card ou um badge
+   funcionam nas duas superfícies sem saber em qual estão, e sem uma única
+   condicional no React. A clara vale no `:root` e OUTRA VEZ em
+   `[data-surface="light"]`, porque as variáveis CSS herdam: sem a segunda
+   declaração, um bloco claro dentro de um escuro herdaria os tokens escuros.
 
    REGRAS DE COR
-     - O dourado é acento: CTA principal, item seleccionado, ícones, passos.
+     - O dourado (`gold`, #C7914A) é PREENCHIMENTO: CTA, item seleccionado,
+       passos do stepper, ícones, o ponto do logótipo.
+     - Sobre o dourado o texto é a tinta escura (6,51:1). Branco sobre o
+       dourado dá 2,77:1 e não passa — as referências mostram-no, mas não se lê.
+     - Sobre o creme o dourado NÃO é texto (2,55:1). Para texto dourado usa-se
+       `text-accent` (#94622A, 4,6:1), que é o mesmo tom escurecido: é o que
+       pinta "onde estiver.", os rótulos "SERVIÇO" e os preços dos cards.
      - O dourado NUNCA é cor de estado.
-     - O dourado NUNCA é texto sobre fundo claro (1,47:1 — ilegível). No claro
-       só aparece como preenchimento, borda de selecção e ícone.
-     - Para TEXTO em destaque usa-se `text-emphasis`, nunca `text-primary`:
-       `--ui-primary` é dourado nas duas superfícies e só se lê sobre a escura.
-     - Na superfície clara o botão primário do fluxo é PRETO, como no template.
    ========================================================================== */
 
 :root,
-[data-surface="dark"] {
+[data-surface="light"] {
   /* ---- CAMADA 1: primitivas -------------------------------------------- */
 
-  /* Neutros frios, do template */
   --mk-white:      #FFFFFF;
-  --mk-off:        #FAFAF9;
-  --mk-grey-100:   #F3F3F1;
-  --mk-grey-200:   #E6E5E2;
-  --mk-grey-500:   #4D5359;
+  --mk-cream-50:   #F7F5F2;   /* fundo das páginas, das referências */
+  --mk-cream-100:  #F1EEE9;
+  --mk-cream-200:  #E6E1DA;
+  --mk-grey-500:   #5B6470;
   --mk-grey-400:   #AEB6BD;
   --mk-ink-700:    #2E363D;
   --mk-ink-800:    #232A31;
   --mk-ink-900:    #1A2026;
   --mk-ink-950:    #12171B;
 
-  /* Dourado champanhe — a cor da marca, tirada do template */
-  --mk-gold:       #F9CE97;
-  --mk-gold-mid:   #D3AE82;
-  --mk-gold-deep:  #8D7460;
-  --mk-cream:      #F9F2EA;
+  /* Dourado bronze — o ponto do logótipo */
+  --mk-gold:       #C7914A;
+  --mk-gold-deep:  #94622A;   /* o mesmo tom, legível como texto no claro */
+  --mk-gold-tint:  #FBF3E8;   /* fundo de um card escolhido */
+  --mk-gold-soft:  #F4E6D3;   /* círculo atrás dos ícones */
 
   /* Estados — dois tons por matiz, um para cada superfície */
   --mk-blue-light:  #7FB8EE;  --mk-blue-dark:  #154C84;
   --mk-green-light: #49C98A;  --mk-green-dark: #0E6F42;
   --mk-red-light:   #F08C83;  --mk-red-dark:   #841F15;
 
-  /* ---- CAMADA 2: semânticas — SUPERFÍCIE ESCURA (por omissão) ----------- */
+  /* ---- CAMADA 2: semânticas — SUPERFÍCIE CLARA (por omissão) ------------ */
 
-  --ui-bg:         var(--mk-ink-950);
-  --ui-surface:    var(--mk-ink-900);
-  --ui-surface-2:  var(--mk-ink-800);
-  --ui-border:     var(--mk-ink-700);
+  --ui-bg:         var(--mk-cream-50);
+  --ui-surface:    var(--mk-white);
+  --ui-surface-2:  var(--mk-cream-100);
+  --ui-border:     var(--mk-cream-200);
 
-  --ui-text:       var(--mk-white);      /* 18,04:1 — AAA */
-  --ui-text-muted: var(--mk-grey-400);   /*  7,07:1 no pior caso — AAA */
+  --ui-text:       var(--mk-ink-950);    /* 17,1:1 */
+  --ui-text-muted: var(--mk-grey-500);   /*  5,5:1 */
 
-  /* Acção */
-  --ui-primary:     var(--mk-gold);      /* 12,29:1 como texto sobre bg */
-  --ui-primary-ink: var(--mk-ink-950);   /* 12,29:1 sobre o dourado */
-  --ui-primary-dim: var(--mk-gold-mid);
-  --ui-focus:       var(--mk-gold);
+  /* Preenchimento dourado (fundo de chip, borda, estrela, ícone). */
+  --ui-primary:     var(--mk-gold);
+  --ui-primary-ink: var(--mk-ink-950);   /* 6,51:1 sobre o dourado */
+  --ui-primary-dim: var(--mk-gold);
+  --ui-focus:       var(--mk-ink-950);
 
-  /* Botão primário do fluxo. No escuro é dourado; no claro passa a preto. */
+  /* Botão primário: dourado com texto escuro, nas duas superfícies. */
   --ui-action:      var(--mk-gold);
   --ui-action-ink:  var(--mk-ink-950);
 
-  /* Texto em destaque — um preço, um total, uma ligação de apoio.
-     É um token à parte de `--ui-primary` porque tem um trabalho diferente:
-     `--ui-primary` é PREENCHIMENTO (fundo de chip, borda, estrela) e no claro
-     continua dourado; este é TEXTO e tem de se ler nas duas superfícies. Usar
-     `text-primary` para texto é o erro que este token existe para evitar. */
-  --ui-emphasis:    var(--mk-gold);      /* 12,29:1 sobre o fundo escuro */
+  /* Texto em destaque neutro — um total, um preço no resumo. */
+  --ui-emphasis:    var(--mk-ink-950);
 
-  /* Selecção (card escolhido): borda dourada + fundo com tinta */
-  --ui-selected-bg:     color-mix(in srgb, var(--mk-gold) 12%, var(--ui-bg));
+  /* Texto dourado — rótulos, preços dos cards, a segunda linha dos títulos. */
+  --ui-accent:      var(--mk-gold-deep);  /* 4,6:1 sobre o creme */
+
+  /* Círculo de fundo atrás de um ícone dourado. */
+  --ui-icon-bg:     var(--mk-gold-soft);
+
+  --ui-selected-bg:     var(--mk-gold-tint);
   --ui-selected-border: var(--mk-gold);
-
-  /* Estados */
-  --ui-pending:        var(--mk-blue-light);
-  --ui-confirmed:      var(--mk-green-light);
-  --ui-done:           var(--mk-grey-400);
-  --ui-cancelled:      var(--mk-red-light);
-  --ui-state-tint:     18%;  /* quanto da cor entra no fundo do badge */
-
-  /* Raios — cantos suaves, como no template */
-  --ui-radius-sm: 8px;
-  --ui-radius-md: 12px;
-  --ui-radius-lg: 16px;
-  --ui-radius-xl: 24px;
-
-  --ui-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.30);
-  --ui-shadow-md: 0 4px 16px rgb(0 0 0 / 0.35);
-  --ui-shadow-lg: 0 16px 40px rgb(0 0 0 / 0.45);
-  --ui-shadow-gold: 0 8px 24px color-mix(in srgb, var(--mk-gold) 20%, transparent);
-}
-
-/* ---- CAMADA 2 (bis): SUPERFÍCIE CLARA ------------------------------------
-   Aplicada com `data-surface="light"` numa página ou numa secção. Redefine só
-   os tokens semânticos; nenhum componente precisa de mudar.
-   -------------------------------------------------------------------------- */
-/* Mesma especificidade que `[data-surface="dark"]`; vem depois, por isso é esta
-   que ganha num elemento marcado como claro. */
-[data-surface="light"] {
-  --ui-bg:         var(--mk-white);
-  --ui-surface:    var(--mk-off);
-  --ui-surface-2:  var(--mk-grey-100);
-  --ui-border:     var(--mk-grey-200);
-
-  --ui-text:       var(--mk-ink-950);    /* 18,04:1 — AAA */
-  --ui-text-muted: var(--mk-grey-500);   /*  7,01:1 no pior caso — AAA */
-
-  /* No claro o dourado deixa de poder ser texto. Para texto de destaque usa-se
-     a tinta escura; o dourado fica para preenchimentos e bordas. */
-  --ui-primary:     var(--mk-gold-mid);
-  --ui-primary-ink: var(--mk-ink-950);
-  --ui-primary-dim: var(--mk-gold-deep);
-  --ui-focus:       var(--mk-ink-950);
-
-  /* Botão "Continuar →": preto com texto branco, 18,04:1 */
-  --ui-action:      var(--mk-ink-950);
-  --ui-action-ink:  var(--mk-white);
-
-  /* No claro o destaque deixa de poder ser dourado: o `--mk-gold-mid` sobre
-     branco dá 2,07:1 e não se lê. Passa a tinta escura, que é também o que o
-     template faz — os preços e os totais do fluxo são pretos e bold. */
-  --ui-emphasis:    var(--mk-ink-950);   /* 18,04:1 */
-
-  --ui-selected-bg:     var(--mk-cream);
-  --ui-selected-border: var(--mk-gold-mid);
 
   --ui-pending:    var(--mk-blue-dark);
   --ui-confirmed:  var(--mk-green-dark);
@@ -155,9 +99,55 @@
   --ui-cancelled:  var(--mk-red-dark);
   --ui-state-tint: 12%;
 
-  --ui-shadow-sm: 0 1px 2px rgb(18 23 27 / 0.06);
-  --ui-shadow-md: 0 4px 16px rgb(18 23 27 / 0.08);
-  --ui-shadow-lg: 0 16px 40px rgb(18 23 27 / 0.12);
+  /* Raios — cantos suaves, como nas referências */
+  --ui-radius-sm: 8px;
+  --ui-radius-md: 12px;
+  --ui-radius-lg: 16px;
+  --ui-radius-xl: 24px;
+
+  --ui-shadow-sm: 0 1px 2px rgb(18 23 27 / 0.05);
+  --ui-shadow-md: 0 4px 16px rgb(18 23 27 / 0.07);
+  --ui-shadow-lg: 0 16px 40px rgb(18 23 27 / 0.10);
+  --ui-shadow-gold: 0 8px 24px color-mix(in srgb, var(--mk-gold) 25%, transparent);
+}
+
+/* ---- CAMADA 2 (bis): SUPERFÍCIE ESCURA ------------------------------------
+   Cabeçalho dos fluxos, rodapé, barra lateral da conta. Redefine só os tokens
+   semânticos; nenhum componente precisa de mudar.
+   -------------------------------------------------------------------------- */
+[data-surface="dark"] {
+  --ui-bg:         var(--mk-ink-950);
+  --ui-surface:    var(--mk-ink-900);
+  --ui-surface-2:  var(--mk-ink-800);
+  --ui-border:     var(--mk-ink-700);
+
+  --ui-text:       var(--mk-white);      /* 18,04:1 */
+  --ui-text-muted: var(--mk-grey-400);   /*  7,07:1 */
+
+  --ui-primary:     var(--mk-gold);
+  --ui-primary-ink: var(--mk-ink-950);
+  --ui-primary-dim: var(--mk-gold);
+  --ui-focus:       var(--mk-gold);
+
+  --ui-action:      var(--mk-gold);
+  --ui-action-ink:  var(--mk-ink-950);
+
+  --ui-emphasis:    var(--mk-white);
+  --ui-accent:      var(--mk-gold);       /* 6,51:1 sobre a tinta */
+  --ui-icon-bg:     color-mix(in srgb, var(--mk-gold) 14%, transparent);
+
+  --ui-selected-bg:     color-mix(in srgb, var(--mk-gold) 12%, var(--ui-bg));
+  --ui-selected-border: var(--mk-gold);
+
+  --ui-pending:        var(--mk-blue-light);
+  --ui-confirmed:      var(--mk-green-light);
+  --ui-done:           var(--mk-grey-400);
+  --ui-cancelled:      var(--mk-red-light);
+  --ui-state-tint:     18%;
+
+  --ui-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.30);
+  --ui-shadow-md: 0 4px 16px rgb(0 0 0 / 0.35);
+  --ui-shadow-lg: 0 16px 40px rgb(0 0 0 / 0.45);
 }
 
 /* ---- CAMADA 3: ponte para o Tailwind ------------------------------------
@@ -181,6 +171,8 @@
   --color-action: var(--ui-action);
   --color-action-ink: var(--ui-action-ink);
   --color-emphasis: var(--ui-emphasis);
+  --color-accent: var(--ui-accent);
+  --color-icon-bg: var(--ui-icon-bg);
 
   --color-selected: var(--ui-selected-bg);
   --color-selected-border: var(--ui-selected-border);
@@ -188,8 +180,8 @@
   /* O dourado literal, para quando é preciso independentemente da superfície
      (o preenchimento de um CTA, uma borda de selecção, um ícone). */
   --color-gold: var(--mk-gold);
-  --color-gold-mid: var(--mk-gold-mid);
-  --color-cream: var(--mk-cream);
+  --color-gold-deep: var(--mk-gold-deep);
+  --color-cream: var(--mk-cream-50);
   --color-ink: var(--mk-ink-950);
 
   --color-pending: var(--ui-pending);
@@ -229,8 +221,8 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Títulos em Plus Jakarta Sans, bold, com maiúscula inicial — como no
-     template ("O teu barbeiro, onde estiveres."). Sem caixa alta. */
+  /* Títulos em Plus Jakarta Sans, bold, com maiúscula inicial — como nas
+     referências ("O seu barbeiro, onde estiver."). Sem caixa alta. */
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 800;

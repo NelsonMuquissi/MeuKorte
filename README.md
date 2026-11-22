@@ -1,4 +1,4 @@
-# Meu Korte
+# Korte.
 
 Plataforma angolana de marcação de cortes de cabelo com barbeiros. Em Luanda,
 o cliente escolhe o barbeiro, escolhe a hora e é atendido no salão ou em casa.
@@ -32,7 +32,7 @@ npm run dev          # http://localhost:3000
 src/
 ├── app/                      Rotas (App Router). URLs em português.
 │   ├── page.tsx              /                   página inicial
-│   ├── barbeiros/            /barbeiros          lista, com filtros
+│   ├── barbeiros/            /barbeiros          lista de barbeiros
 │   │   └── [id]/             /barbeiros/[slug]   perfil (generateStaticParams)
 │   ├── agendar/              /agendar            jornada do domicílio (6 passos)
 │   ├── salao/                /salao              jornada do salão (5 passos)
@@ -142,18 +142,18 @@ grep -n "PROVISÓRIO" src/config/business.ts
 
 | Valor | Actual | Decisão em aberto |
 |---|---|---|
-| `PLANS.member.price` | 18 000 Kz/mês | Preço da subscrição de membro |
-| `PLANS.member.includedCuts` | 4 | Cortes incluídos por mês |
 | `COMMISSION.rate` | 15% | Comissão, subscrição ou ambos? |
-| `PAYMENT.moment` | `on_service` | Paga ao marcar ou no fim do serviço? |
-| `PAYMENT.methods` | Multicaixa Express, Transferência, Numerário | Confirmar métodos |
+| `PAYMENT.moment` | `on_service` | ✅ Confirmado (FAQ do cliente, Nov 2026) |
+| `PAYMENT.methods` | Multicaixa Express, Transferência bancária, Numerário | ✅ Confirmado (FAQ do cliente) |
+
+Os planos de assinatura saíram da página inicial a pedido do cliente (Nov 2026).
 
 ### Cancelamentos e atrasos
 
 | Valor | Actual | Decisão em aberto |
 |---|---|---|
-| `CANCELLATION.minHoursBefore` | 2 h | Antecedência mínima para cancelar |
-| `CANCELLATION.lateToleranceMinutes` | 15 min | Tolerância de atraso |
+| `CANCELLATION.minHoursBefore` | 6 h | ✅ Confirmado (FAQ do cliente) |
+| `CANCELLATION.lateToleranceMinutes` | 15 min | ✅ Confirmado (FAQ do cliente) |
 | `CANCELLATION.noShowPenalty` | `false` | Há penalização por falta? |
 
 ### Contactos
@@ -179,6 +179,12 @@ grep -n "PROVISÓRIO" src/config/business.ts
 |---|---|---|
 | `DEMO_PIN` | `2024` | ⚠️ **Não é segurança.** Ver abaixo. |
 
+### Promessas da interface
+
+| Valor | Nota |
+|---|---|
+| `CLAIMS.trustPanel` | "Barbeiros experientes e certificados", "Todos os equipamentos são esterilizados" — texto do cliente; só pode ficar se for verdade em todos os barbeiros |
+
 ## Outras coisas a saber
 
 ### O PIN dos painéis não protege nada
@@ -199,36 +205,26 @@ dispositivo — servem para demonstrar o painel, não para medir o negócio.
 
 ### Fotografias
 
-Cinco imagens são **reais** (entregues a 11/10/2026, em `img/`); as restantes
-continuam a ser marcadores gerados com "FOTO PROVISÓRIA" escrito por cima.
+Desde Novembro de 2026 as fotografias vêm das referências do cliente
+(`Novas_Referencias/`, pasta local **fora do git**), recortadas para
+`public/images/`. São imagens de maquete: servem para o teste, mas estão em
+baixa resolução e devem ser trocadas por fotos reais dos parceiros.
 
 | Ficheiros | Estado | Para quê |
 |---|---|---|
-| `hero.jpg` | ✅ real | Fundo da página inicial. Recortado para tirar a frase gravada na imagem |
-| `servicos-destaque.jpg` | ✅ real | Painel "Qualidade · Conveniência · Estilo" |
-| `como-funciona-fundo.jpg` | ✅ real | Fundo de "Como funciona" |
-| `confianca.jpg` | ✅ real | Banner "Mais do que um corte. É confiança." |
-| `og.jpg` (em `public/`) | ✅ real | Partilha no WhatsApp e no Instagram, 1200×630 |
-| `barber-*.jpg` (4) | ⚠️ provisória | Perfil e escolha do barbeiro. Quadrada, ≥ 800×800 |
+| `hero-principal.jpg` | ✅ das referências | Herói da página inicial, com a mancha dourada |
+| `servico-domicilio.jpg`, `servico-salao.jpg` | ✅ das referências | Cards "Os nossos serviços". ⚠️ A do salão mostra o logótipo antigo "MK MEUKORTE" na parede |
+| `servico-corte.jpg`, `servico-corte-barba.jpg` | ✅ das referências | Passo "Serviço" dos fluxos |
+| `estilo-*.jpg` (5) | ✅ das referências | Passo "Estilo": quatro cortes + "Desenhar barba" |
+| `barber-*.jpg` (4) | ✅ das referências | Cards e perfil dos barbeiros. ⚠️ O boné do João Ferreira tem o monograma antigo |
+| `como-funciona.jpg` | ✅ das referências | "Como funciona". O logótipo no ecrã do telemóvel foi trocado por "Korte." |
+| `servicos-destaque.jpg` | ✅ real (Out 2026) | Painel "confiança" |
 | `shop-*.jpg` (3) | ⚠️ provisória | Escolha da barbearia, passo 1 do salão. Horizontal 8:5, ≥ 1200×750 |
-| `style-*.jpg` (6) | ⚠️ provisória | Passo 2 do fluxo — estilo de corte. Vertical 4:5, ≥ 800×1000 |
-| `beard-*.jpg` (3) | ⚠️ provisória | Passo 2 do fluxo — estilo de barba. Vertical 4:5, ≥ 800×1000 |
-| `confirmacao-fundo.jpg` | 🗑️ sem uso | Era do ecrã de confirmação antigo. Pode apagar-se |
+| `og.jpg` (em `public/`) | ✅ gerada | Partilha no WhatsApp e no Instagram, 1200×630, com o logótipo "Korte." |
 
-As dos estilos são as mais urgentes: desde que o fluxo tem o passo do estilo,
-são elas que o cliente usa para decidir o corte. Um marcador cinzento não
-deixa escolher nada.
-
-**As cinco reais estão em baixa resolução** — entre 334 e 552 px de largura,
-contra os 1600 px que um fundo de largura total pede. O `next/image` amplia-as
-2× a 4×, e nota-se. Se houver os originais em tamanho maior, substituir os
-ficheiros chega: os nomes e os recortes já estão certos.
-
-**Trocar uma fotografia obriga a medir o contraste outra vez.** O texto da
-página inicial está por cima destas imagens, e os véus escuros do herói estão
-afinados ao pixel mais claro de cada foto. Quando a foto provisória, escura,
-deu lugar a esta, o parágrafo do herói caiu para 1,76:1 — bem abaixo do mínimo
-de 4,5:1 — até os véus serem reforçados.
+**Resolução baixa.** Os recortes têm entre 200 e 650 px de largura. O
+`next/image` amplia-os, e nota-se em ecrãs de alta densidade. Substituir o
+ficheiro pelo mesmo nome chega.
 
 ## Fase seguinte: Django + DRF + PostgreSQL
 

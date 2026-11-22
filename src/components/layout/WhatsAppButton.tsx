@@ -8,7 +8,7 @@ import { isFlowRoute } from './routes';
 /**
  * Botão flutuante do WhatsApp.
  *
- * O atendimento do Meu Korte é por WhatsApp Business, por isso o botão
+ * O atendimento da Korte é por WhatsApp Business, por isso o botão
  * acompanha as páginas públicas.
  *
  * Desaparece dentro do fluxo de agendamento: ali ficaria por cima da grelha de
